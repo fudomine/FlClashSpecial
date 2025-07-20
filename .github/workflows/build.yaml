@@ -1,9 +1,8 @@
 name: build
 
 on:
-  push:
-    release:
-      types: [published]
+   release:
+    types: [published]
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
 
