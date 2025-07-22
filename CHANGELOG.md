@@ -1,3 +1,9 @@
+## v1.8.86
+
+- Update setup.dart
+- Update constant.dart
+- Update distribute_options.yaml
+
 ## v0.8.86
 
 - Fix windows tun issues
