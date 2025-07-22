@@ -8,7 +8,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/material.dart';
 
-const appName = "FlClashSP";
+const appName = "FlClash";
 const appHelperService = "FlClashHelperService";
 const coreName = "clash.meta";
 const browserUa =
