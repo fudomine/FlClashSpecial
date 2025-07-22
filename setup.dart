@@ -132,7 +132,7 @@ class Build {
         ),
       ];
 
-  static String get appName => "FlClashSP";
+  static String get appName => "FlClash";
 
   static String get coreName => "FlClashCore";
 
