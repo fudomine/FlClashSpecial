@@ -462,56 +462,15 @@ class AppController {
   }
 
   autoCheckUpdate() async {
-    if (!_ref.read(appSettingProvider).autoCheckUpdate) return;
-    final res = await request.checkForUpdate();
-    checkUpdateResultHandle(data: res);
+  // 暂时禁用自动检查更新
+     return;
   }
 
   checkUpdateResultHandle({
     Map<String, dynamic>? data,
     bool handleError = false,
   }) async {
-    if (globalState.isPre) {
-      return;
-    }
-    if (data != null) {
-      final tagName = data['tag_name'];
-      final body = data['body'];
-      final submits = utils.parseReleaseBody(body);
-      final textTheme = context.textTheme;
-      final res = await globalState.showMessage(
-        title: appLocalizations.discoverNewVersion,
-        message: TextSpan(
-          text: "$tagName \n",
-          style: textTheme.headlineSmall,
-          children: [
-            TextSpan(
-              text: "\n",
-              style: textTheme.bodyMedium,
-            ),
-            for (final submit in submits)
-              TextSpan(
-                text: "- $submit \n",
-                style: textTheme.bodyMedium,
-              ),
-          ],
-        ),
-        confirmText: appLocalizations.goDownload,
-      );
-      if (res != true) {
-        return;
-      }
-      launchUrl(
-        Uri.parse("https://github.com/fudomine/FlClashSpecial/releases/latest"),
-      );
-    } else if (handleError) {
-      globalState.showMessage(
-        title: appLocalizations.checkUpdate,
-        message: TextSpan(
-          text: appLocalizations.checkUpdateError,
-        ),
-      );
-    }
+    return;
   }
 
   _handlePreference() async {
