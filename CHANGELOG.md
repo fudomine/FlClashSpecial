@@ -1,3 +1,9 @@
+## v1.8.87
+
+- update
+
+- Update changelog
+
 ## v1.8.86
 
 - Update setup.dart
