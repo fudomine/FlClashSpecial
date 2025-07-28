@@ -69,7 +69,7 @@ class Request {
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
     final response = await _dio.get(
-      "https://api.github.com/repos/$repository/releases/latest",
+      "https://api.github.com/repos/fudomine/FlClashSpecial/releases/latest",
       options: Options(
         responseType: ResponseType.json,
       ),

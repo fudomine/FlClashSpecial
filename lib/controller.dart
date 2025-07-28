@@ -502,7 +502,7 @@ class AppController {
         return;
       }
       launchUrl(
-        Uri.parse("https://github.com/$repository/releases/latest"),
+        Uri.parse("https://github.com/fudomine/FlClashSpecial/releases/latest"),
       );
     } else if (handleError) {
       globalState.showMessage(
