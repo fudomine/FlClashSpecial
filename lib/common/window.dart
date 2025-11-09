@@ -7,26 +7,26 @@ import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
 class Window {
-  init(int version) async {
+  Future<void> init(int version) async {
     final props = globalState.config.windowProps;
     final acquire = await singleInstanceLock.acquire();
     if (!acquire) {
       exit(0);
     }
-    if (Platform.isWindows) {
-      protocol.register("clash");
-      protocol.register("clashmeta");
-      protocol.register("flclash");
+    if (system.isWindows) {
+      protocol.register('clash');
+      protocol.register('clashmeta');
+      protocol.register('flclash');
     }
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(
       size: Size(props.width, props.height),
       minimumSize: const Size(380, 400),
     );
-    if (!Platform.isMacOS || version > 10) {
+    if (!system.isMacOS || version > 10) {
       await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
     }
-    if (!Platform.isMacOS) {
+    if (!system.isMacOS) {
       final left = props.left ?? 0;
       final top = props.top ?? 0;
       final right = left + props.width;
@@ -35,25 +35,18 @@ class Window {
         await windowManager.setAlignment(Alignment.center);
       } else {
         final displays = await screenRetriever.getAllDisplays();
-        final isPositionValid = displays.any(
-          (display) {
-            final displayBounds = Rect.fromLTWH(
-              display.visiblePosition!.dx,
-              display.visiblePosition!.dy,
-              display.size.width,
-              display.size.height,
-            );
-            return displayBounds.contains(Offset(left, top)) ||
-                displayBounds.contains(Offset(right, bottom));
-          },
-        );
-        if (isPositionValid) {
-          await windowManager.setPosition(
-            Offset(
-              left,
-              top,
-            ),
+        final isPositionValid = displays.any((display) {
+          final displayBounds = Rect.fromLTWH(
+            display.visiblePosition!.dx,
+            display.visiblePosition!.dy,
+            display.size.width,
+            display.size.height,
           );
+          return displayBounds.contains(Offset(left, top)) ||
+              displayBounds.contains(Offset(right, bottom));
+        });
+        if (isPositionValid) {
+          await windowManager.setPosition(Offset(left, top));
         }
       }
     }
@@ -62,7 +55,7 @@ class Window {
     });
   }
 
-  show() async {
+  Future<void> show() async {
     render?.resume();
     await windowManager.show();
     await windowManager.focus();
@@ -71,15 +64,15 @@ class Window {
 
   Future<bool> get isVisible async {
     final value = await windowManager.isVisible();
-    commonPrint.log("window visible check: $value");
+    commonPrint.log('window visible check: $value');
     return value;
   }
 
-  close() async {
+  Future<void> close() async {
     exit(0);
   }
 
-  hide() async {
+  Future<void> hide() async {
     render?.pause();
     await windowManager.hide();
     await windowManager.setSkipTaskbar(true);

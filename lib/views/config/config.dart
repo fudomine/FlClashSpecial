@@ -1,6 +1,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/providers/config.dart' show patchClashConfigProvider;
+import 'package:fl_clash/models/config.dart';
+import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/general.dart';
@@ -26,9 +27,7 @@ class _ConfigViewState extends State<ConfigView> {
         leading: const Icon(Icons.build),
         delegate: OpenDelegate(
           title: appLocalizations.general,
-          widget: generateListView(
-            generalItems,
-          ),
+          widget: generateListView(generalItems),
           blur: false,
         ),
       ),
@@ -39,52 +38,75 @@ class _ConfigViewState extends State<ConfigView> {
         delegate: OpenDelegate(
           title: appLocalizations.network,
           blur: false,
+          actions: [
+            Consumer(
+              builder: (_, ref, _) {
+                return IconButton(
+                  onPressed: () async {
+                    final res = await globalState.showMessage(
+                      title: appLocalizations.reset,
+                      message: TextSpan(text: appLocalizations.resetTip),
+                    );
+                    if (res != true) {
+                      return;
+                    }
+                    ref
+                        .read(vpnSettingProvider.notifier)
+                        .updateState(
+                          (state) => defaultVpnProps.copyWith(
+                            accessControl: state.accessControl,
+                          ),
+                        );
+                    ref
+                        .read(patchClashConfigProvider.notifier)
+                        .updateState(
+                          (state) => state.copyWith(tun: defaultTun),
+                        );
+                  },
+                  tooltip: appLocalizations.reset,
+                  icon: const Icon(Icons.replay),
+                );
+              },
+            ),
+          ],
           widget: const NetworkListView(),
         ),
       ),
       ListItem.open(
-        title: const Text("DNS"),
+        title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
         leading: const Icon(Icons.dns),
         delegate: OpenDelegate(
-          title: "DNS",
-          action: Consumer(builder: (_, ref, __) {
-            return IconButton(
-              onPressed: () async {
-                final res = await globalState.showMessage(
-                  title: appLocalizations.reset,
-                  message: TextSpan(
-                    text: appLocalizations.resetTip,
-                  ),
-                );
-                if (res != true) {
-                  return;
-                }
-                ref.read(patchClashConfigProvider.notifier).updateState(
-                      (state) => state.copyWith(
-                        dns: defaultDns,
-                      ),
+          title: 'DNS',
+          actions: [
+            Consumer(
+              builder: (_, ref, _) {
+                return IconButton(
+                  onPressed: () async {
+                    final res = await globalState.showMessage(
+                      title: appLocalizations.reset,
+                      message: TextSpan(text: appLocalizations.resetTip),
                     );
+                    if (res != true) {
+                      return;
+                    }
+                    ref
+                        .read(patchClashConfigProvider.notifier)
+                        .updateState(
+                          (state) => state.copyWith(dns: defaultDns),
+                        );
+                  },
+                  tooltip: appLocalizations.reset,
+                  icon: const Icon(Icons.replay),
+                );
               },
-              tooltip: appLocalizations.reset,
-              icon: const Icon(
-                Icons.replay,
-              ),
-            );
-          }),
+            ),
+          ],
           widget: const DnsListView(),
           blur: false,
         ),
-      )
+      ),
     ];
-    return generateListView(
-      items
-          .separated(
-            const Divider(
-              height: 0,
-            ),
-          )
-          .toList(),
-    );
+    return generateListView(items.separated(const Divider(height: 0)).toList());
   }
 }

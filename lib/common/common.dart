@@ -1,6 +1,7 @@
-export 'android.dart';
 export 'app_localizations.dart';
+export 'cache.dart';
 export 'color.dart';
+export 'compute.dart';
 export 'constant.dart';
 export 'context.dart';
 export 'converter.dart';
@@ -37,4 +38,3 @@ export 'text.dart';
 export 'tray.dart';
 export 'utils.dart';
 export 'window.dart';
-export 'windows.dart';

@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
           - platform: windows
-            os: windows-latest
+            os: Windows-2022
             arch: amd64
           - platform: linux
             os: ubuntu-22.04
@@ -24,9 +24,9 @@ jobs:
           - platform: macos
             os: macos-latest
             arch: arm64
-          - platform: windows
-            os: windows-11-arm
-            arch: arm64
+          #          - platform: windows
+          #            os: windows-11-arm
+          #            arch: arm64
           - platform: linux
             os: ubuntu-24.04-arm
             arch: arm64

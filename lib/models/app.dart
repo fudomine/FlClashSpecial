@@ -1,6 +1,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:flutter/material.dart';
+import 'package:fl_clash/models/selector.dart';
+import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'common.dart';
@@ -11,7 +12,7 @@ part 'generated/app.freezed.dart';
 typedef DelayMap = Map<String, Map<String, int?>>;
 
 @freezed
-class AppState with _$AppState {
+abstract class AppState with _$AppState {
   const factory AppState({
     @Default(false) bool isInit,
     @Default(false) bool backBlock,
@@ -19,20 +20,25 @@ class AppState with _$AppState {
     @Default([]) List<Package> packages,
     @Default(0) int sortNum,
     required Size viewSize,
+    @Default(0) double sideWidth,
     @Default({}) DelayMap delayMap,
     @Default([]) List<Group> groups,
     @Default(0) int checkIpNum,
-    Brightness? brightness,
+    required Brightness brightness,
     int? runTime,
     @Default([]) List<ExternalProvider> providers,
     String? localIp,
-    required FixedList<Connection> requests,
+    required FixedList<TrackerInfo> requests,
     required int version,
     required FixedList<Log> logs,
     required FixedList<Traffic> traffics,
     required Traffic totalTraffic,
-    @Default("") String proxiesQuery,
     @Default(false) bool realTunEnable,
+    @Default(false) bool loading,
+    required SystemUiOverlayStyle systemUiOverlayStyle,
+    ProfileOverrideModel? profileOverrideModel,
+    @Default({}) Map<QueryTag, String> queryMap,
+    @Default(CoreStatus.connecting) CoreStatus coreStatus,
   }) = _AppState;
 }
 

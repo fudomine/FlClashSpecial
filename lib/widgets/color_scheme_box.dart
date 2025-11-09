@@ -37,7 +37,7 @@ class ColorSchemeBox extends StatelessWidget {
                   ),
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    child: ClipRRect(
+                    child: ClipRSuperellipse(
                       borderRadius: BorderRadius.circular(36),
                       child: SizedBox(
                         width: 72,
@@ -47,22 +47,16 @@ class ColorSchemeBox extends StatelessWidget {
                           children: [
                             GridItem(
                               mainAxisCellCount: 2,
-                              child: Container(
-                                color: colorScheme.primary,
-                              ),
+                              child: Container(color: colorScheme.primary),
                             ),
                             GridItem(
                               mainAxisCellCount: 1,
-                              child: Container(
-                                color: colorScheme.secondary,
-                              ),
+                              child: Container(color: colorScheme.secondary),
                             ),
                             GridItem(
                               mainAxisCellCount: 1,
-                              child: Container(
-                                color: colorScheme.tertiary,
-                              ),
-                            )
+                              child: Container(color: colorScheme.tertiary),
+                            ),
                           ],
                         ),
                       ),
@@ -73,11 +67,8 @@ class ColorSchemeBox extends StatelessWidget {
                   const Positioned(
                     bottom: 4,
                     right: 4,
-                    child: Icon(
-                      Icons.colorize,
-                      size: 20,
-                    ),
-                  )
+                    child: Icon(Icons.colorize, size: 20),
+                  ),
               ],
             );
           },
@@ -90,11 +81,15 @@ class ColorSchemeBox extends StatelessWidget {
 class PrimaryColorBox extends ConsumerWidget {
   final Color? primaryColor;
   final Widget child;
+  final Brightness? brightness;
+  final bool ignoreConfig;
 
   const PrimaryColorBox({
     super.key,
     required this.primaryColor,
     required this.child,
+    this.brightness,
+    this.ignoreConfig = true,
   });
 
   @override
@@ -102,15 +97,13 @@ class PrimaryColorBox extends ConsumerWidget {
     final themeData = Theme.of(context);
     final colorScheme = ref.watch(
       genColorSchemeProvider(
-        themeData.brightness,
+        brightness ?? themeData.brightness,
         color: primaryColor,
-        ignoreConfig: true,
+        ignoreConfig: ignoreConfig,
       ),
     );
     return Theme(
-      data: themeData.copyWith(
-        colorScheme: colorScheme,
-      ),
+      data: themeData.copyWith(colorScheme: colorScheme),
       child: child,
     );
   }

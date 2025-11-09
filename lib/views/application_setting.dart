@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -21,11 +19,9 @@ class CloseConnectionsItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: closeConnections,
         onChanged: (value) async {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  closeConnections: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(closeConnections: value));
         },
       ),
     );
@@ -46,10 +42,10 @@ class UsageItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: onlyStatisticsProxy,
         onChanged: (bool value) async {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  onlyStatisticsProxy: value,
-                ),
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState(
+                (state) => state.copyWith(onlyStatisticsProxy: value),
               );
         },
       ),
@@ -71,11 +67,9 @@ class MinimizeItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: minimizeOnExit,
         onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  minimizeOnExit: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(minimizeOnExit: value));
         },
       ),
     );
@@ -96,11 +90,9 @@ class AutoLaunchItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: autoLaunch,
         onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  autoLaunch: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(autoLaunch: value));
         },
       ),
     );
@@ -121,11 +113,9 @@ class SilentLaunchItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: silentLaunch,
         onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  silentLaunch: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(silentLaunch: value));
         },
       ),
     );
@@ -146,11 +136,9 @@ class AutoRunItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: autoRun,
         onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  autoRun: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(autoRun: value));
         },
       ),
     );
@@ -171,11 +159,9 @@ class HiddenItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: hidden,
         onChanged: (value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  hidden: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(hidden: value));
         },
       ),
     );
@@ -196,11 +182,9 @@ class AnimateTabItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: isAnimateToPage,
         onChanged: (value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  isAnimateToPage: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(isAnimateToPage: value));
         },
       ),
     );
@@ -221,11 +205,32 @@ class OpenLogsItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: openLogs,
         onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  openLogs: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(openLogs: value));
+        },
+      ),
+    );
+  }
+}
+
+class CrashlyticsItem extends ConsumerWidget {
+  const CrashlyticsItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final crashlytics = ref.watch(
+      appSettingProvider.select((state) => state.crashlytics),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.crashlytics),
+      subtitle: Text(appLocalizations.crashlyticsTip),
+      delegate: SwitchDelegate(
+        value: crashlytics,
+        onChanged: (bool value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(crashlytics: value));
         },
       ),
     );
@@ -246,11 +251,9 @@ class AutoCheckUpdateItem extends ConsumerWidget {
       delegate: SwitchDelegate(
         value: autoCheckUpdate,
         onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  autoCheckUpdate: value,
-                ),
-              );
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState((state) => state.copyWith(autoCheckUpdate: value));
         },
       ),
     );
@@ -269,18 +272,14 @@ class ApplicationSettingView extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> items = [
       MinimizeItem(),
-      if (system.isDesktop) ...[
-        AutoLaunchItem(),
-        SilentLaunchItem(),
-      ],
+      if (system.isDesktop) ...[AutoLaunchItem(), SilentLaunchItem()],
       AutoRunItem(),
-      if (Platform.isAndroid) ...[
-        HiddenItem(),
-      ],
+      if (system.isAndroid) ...[HiddenItem()],
       AnimateTabItem(),
       OpenLogsItem(),
       CloseConnectionsItem(),
       UsageItem(),
+      if (system.isAndroid) CrashlyticsItem(),
       AutoCheckUpdateItem(),
     ];
     return ListView.separated(
@@ -288,10 +287,8 @@ class ApplicationSettingView extends StatelessWidget {
         final item = items[index];
         return item;
       },
-      separatorBuilder: (_, __) {
-        return const Divider(
-          height: 0,
-        );
+      separatorBuilder: (_, _) {
+        return const Divider(height: 0);
       },
       itemCount: items.length,
     );

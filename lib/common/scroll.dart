@@ -8,13 +8,40 @@ import 'package:flutter/material.dart';
 class BaseScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.stylus,
-        PointerDeviceKind.invertedStylus,
-        PointerDeviceKind.trackpad,
-        if (system.isDesktop) PointerDeviceKind.mouse,
-        PointerDeviceKind.unknown,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+    PointerDeviceKind.trackpad,
+    if (system.isDesktop) PointerDeviceKind.mouse,
+    PointerDeviceKind.unknown,
+  };
+
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    switch (axisDirectionToAxis(details.direction)) {
+      case Axis.horizontal:
+        return child;
+      case Axis.vertical:
+        switch (getPlatform(context)) {
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            assert(details.controller != null);
+            return CommonScrollBar(
+              controller: details.controller,
+              child: child,
+            );
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            return child;
+        }
+    }
+  }
 }
 
 class HiddenBarScrollBehavior extends BaseScrollBehavior {
@@ -35,10 +62,7 @@ class ShowBarScrollBehavior extends BaseScrollBehavior {
     Widget child,
     ScrollableDetails details,
   ) {
-    return CommonAutoHiddenScrollBar(
-      controller: details.controller,
-      child: child,
-    );
+    return CommonScrollBar(controller: details.controller, child: child);
   }
 }
 
@@ -52,7 +76,9 @@ class NextClampingScrollPhysics extends ClampingScrollPhysics {
 
   @override
   Simulation? createBallisticSimulation(
-      ScrollMetrics position, double velocity) {
+    ScrollMetrics position,
+    double velocity,
+  ) {
     final Tolerance tolerance = toleranceFor(position);
     if (position.outOfRange) {
       double? end;
@@ -87,6 +113,54 @@ class NextClampingScrollPhysics extends ClampingScrollPhysics {
     );
   }
 }
+
+// class CacheScrollPositionController extends ScrollController {
+//   final String key;
+//
+//   CacheScrollPositionController({
+//     required this.key,
+//     double initialScrollOffset = 0.0,
+//     super.keepScrollOffset = true,
+//     super.debugLabel,
+//     super.onAttach,
+//     super.onDetach,
+//   });
+//
+//   @override
+//   ScrollPosition createScrollPosition(
+//     ScrollPhysics physics,
+//     ScrollContext context,
+//     ScrollPosition? oldPosition,
+//   ) {
+//     return ScrollPositionWithSingleContext(
+//       physics: physics,
+//       context: context,
+//       initialPixels:
+//           globalState.scrollPositionCache[key] ?? initialScrollOffset,
+//       keepScrollOffset: keepScrollOffset,
+//       oldPosition: oldPosition,
+//       debugLabel: debugLabel,
+//     );
+//   }
+//
+//   double? get cacheOffset => globalState.scrollPositionCache[key];
+//
+//   _handleScroll() {
+//     globalState.scrollPositionCache[key] = position.pixels;
+//   }
+//
+//   @override
+//   void attach(ScrollPosition position) {
+//     super.attach(position);
+//     addListener(_handleScroll);
+//   }
+//
+//   @override
+//   void detach(ScrollPosition position) {
+//     removeListener(_handleScroll);
+//     super.detach(position);
+//   }
+// }
 
 class ReverseScrollController extends ScrollController {
   ReverseScrollController({

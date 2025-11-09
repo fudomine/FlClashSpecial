@@ -16,49 +16,42 @@ class Delegate {
 
 class RadioDelegate<T> extends Delegate {
   final T value;
-  final T groupValue;
-  final void Function(T?)? onChanged;
+  final void Function()? onTab;
 
-  const RadioDelegate({
-    required this.value,
-    required this.groupValue,
-    this.onChanged,
-  });
+  const RadioDelegate({required this.value, this.onTab});
 }
 
 class SwitchDelegate<T> extends Delegate {
   final bool value;
   final ValueChanged<bool>? onChanged;
 
-  const SwitchDelegate({
-    required this.value,
-    this.onChanged,
-  });
+  const SwitchDelegate({required this.value, this.onChanged});
 }
 
 class CheckboxDelegate<T> extends Delegate {
   final bool value;
   final ValueChanged<bool?>? onChanged;
 
-  const CheckboxDelegate({
-    this.value = false,
-    this.onChanged,
-  });
+  const CheckboxDelegate({this.value = false, this.onChanged});
 }
 
 class OpenDelegate extends Delegate {
   final Widget widget;
   final String title;
   final double? maxWidth;
-  final Widget? action;
+  final List<Widget> actions;
   final bool blur;
+  final bool wrap;
+  final bool forceFull;
 
   const OpenDelegate({
     required this.title,
     required this.widget,
     this.maxWidth,
-    this.action,
+    this.actions = const [],
     this.blur = true,
+    this.wrap = true,
+    this.forceFull = true,
   });
 }
 
@@ -66,15 +59,17 @@ class NextDelegate extends Delegate {
   final Widget widget;
   final String title;
   final double? maxWidth;
-  final Widget? action;
+  final List<Widget> actions;
   final bool blur;
+  final bool wrap;
 
   const NextDelegate({
     required this.title,
     required this.widget,
     this.maxWidth,
-    this.action,
+    this.actions = const [],
     this.blur = true,
+    this.wrap = true,
   });
 }
 
@@ -125,6 +120,7 @@ class ListItem<T> extends StatelessWidget {
   final double? horizontalTitleGap;
   final TextStyle? titleTextStyle;
   final TextStyle? subtitleTextStyle;
+  final double minVerticalPadding;
   final void Function()? onTap;
 
   const ListItem({
@@ -139,6 +135,7 @@ class ListItem<T> extends StatelessWidget {
     this.onTap,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : delegate = const Delegate();
 
@@ -154,6 +151,7 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : onTap = null;
 
@@ -169,6 +167,7 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : onTap = null;
 
@@ -184,6 +183,7 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : onTap = null;
 
@@ -199,6 +199,7 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : onTap = null;
 
@@ -213,9 +214,10 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
-  })  : trailing = null,
-        onTap = null;
+  }) : trailing = null,
+       onTap = null;
 
   const ListItem.switchItem({
     super.key,
@@ -228,9 +230,10 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
-  })  : trailing = null,
-        onTap = null;
+  }) : trailing = null,
+       onTap = null;
 
   const ListItem.radio({
     super.key,
@@ -243,11 +246,12 @@ class ListItem<T> extends StatelessWidget {
     this.dense,
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
-  })  : leading = null,
-        onTap = null;
+  }) : leading = null,
+       onTap = null;
 
-  _buildListTile({
+  Widget _buildListTile({
     void Function()? onTap,
     Widget? trailing,
     Widget? leading,
@@ -260,7 +264,7 @@ class ListItem<T> extends StatelessWidget {
       leading: leading ?? this.leading,
       horizontalTitleGap: horizontalTitleGap,
       title: title,
-      minVerticalPadding: 12,
+      minVerticalPadding: minVerticalPadding,
       subtitle: subtitle,
       titleAlignment: tileTitleAlignment,
       onTap: onTap,
@@ -273,9 +277,7 @@ class ListItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     if (delegate is OpenDelegate) {
       final openDelegate = delegate as OpenDelegate;
-      final child = SafeArea(
-        child: openDelegate.widget,
-      );
+      final child = openDelegate.widget;
       return OpenContainer(
         closedBuilder: (_, action) {
           openAction() {
@@ -286,16 +288,17 @@ class ListItem<T> extends StatelessWidget {
                 props: ExtendProps(
                   blur: openDelegate.blur,
                   maxWidth: openDelegate.maxWidth,
+                  forceFull: openDelegate.forceFull,
                 ),
                 builder: (_, type) {
-                  return AdaptiveSheetScaffold(
-                    actions: [
-                      if (openDelegate.action != null) openDelegate.action!,
-                    ],
-                    type: type,
-                    body: child,
-                    title: openDelegate.title,
-                  );
+                  return openDelegate.wrap
+                      ? AdaptiveSheetScaffold(
+                          actions: openDelegate.actions,
+                          type: type,
+                          body: child,
+                          title: openDelegate.title,
+                        )
+                      : child;
                 },
               );
               return;
@@ -303,28 +306,23 @@ class ListItem<T> extends StatelessWidget {
             action();
           }
 
-          return _buildListTile(
-            onTap: openAction,
-          );
+          return _buildListTile(onTap: openAction);
         },
         openBuilder: (_, action) {
-          return CommonScaffold.open(
-            key: Key(openDelegate.title),
-            onBack: action,
-            title: openDelegate.title,
-            body: child,
-            actions: [
-              if (openDelegate.action != null) openDelegate.action!,
-            ],
-          );
+          return openDelegate.wrap
+              ? CommonScaffold(
+                  key: Key(openDelegate.title),
+                  title: openDelegate.title,
+                  body: child,
+                  actions: openDelegate.actions,
+                )
+              : child;
         },
       );
     }
     if (delegate is NextDelegate) {
       final nextDelegate = delegate as NextDelegate;
-      final child = SafeArea(
-        child: nextDelegate.widget,
-      );
+      final child = nextDelegate.widget;
 
       return _buildListTile(
         onTap: () {
@@ -335,14 +333,14 @@ class ListItem<T> extends StatelessWidget {
               maxWidth: nextDelegate.maxWidth,
             ),
             builder: (_, type) {
-              return AdaptiveSheetScaffold(
-                actions: [
-                  if (nextDelegate.action != null) nextDelegate.action!,
-                ],
-                type: type,
-                body: child,
-                title: nextDelegate.title,
-              );
+              return nextDelegate.wrap
+                  ? AdaptiveSheetScaffold(
+                      actions: nextDelegate.actions,
+                      type: type,
+                      body: child,
+                      title: nextDelegate.title,
+                    )
+                  : child;
             },
           );
         },
@@ -412,25 +410,17 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is RadioDelegate) {
       final radioDelegate = delegate as RadioDelegate<T>;
       return _buildListTile(
-        onTap: () {
-          if (radioDelegate.onChanged != null) {
-            radioDelegate.onChanged!(radioDelegate.value);
-          }
-        },
+        onTap: radioDelegate.onTab,
         leading: Radio<T>(
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: radioDelegate.value,
-          groupValue: radioDelegate.groupValue,
-          onChanged: radioDelegate.onChanged,
           toggleable: true,
         ),
         trailing: trailing,
       );
     }
 
-    return _buildListTile(
-      onTap: onTap,
-    );
+    return _buildListTile(onTap: onTap);
   }
 }
 
@@ -454,13 +444,9 @@ class ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.centerLeft,
-      padding: padding ??
-          const EdgeInsets.only(
-            left: 16,
-            right: 8,
-            top: 24,
-            bottom: 8,
-          ),
+      padding:
+          padding ??
+          const EdgeInsets.only(left: 16, right: 8, top: 24, bottom: 8),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -472,19 +458,18 @@ class ListHeader extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurfaceVariant
-                            .opacity80,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.opacity80,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 if (subTitle != null)
                   Text(
                     subTitle!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                   ),
               ],
             ),
@@ -492,12 +477,7 @@ class ListHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ...genActions(
-                actions,
-                space: space,
-              ),
-            ],
+            children: [...genActions(actions, space: space)],
           ),
         ],
       ),
@@ -512,18 +492,11 @@ List<Widget> generateSection({
   bool separated = true,
 }) {
   final genItems = separated
-      ? items.separated(
-          const Divider(
-            height: 0,
-          ),
-        )
+      ? items.separated(const Divider(height: 0))
       : items;
   return [
     if (items.isNotEmpty && title != null)
-      ListHeader(
-        title: title,
-        actions: actions,
-      ),
+      ListHeader(title: title, actions: actions),
     ...genItems,
   ];
 }
@@ -534,22 +507,26 @@ Widget generateSectionV2({
   List<Widget>? actions,
   bool separated = true,
 }) {
+  final genItems = items
+      .map<Widget>((item) {
+        return ClipRSuperellipse(
+          borderRadius: BorderRadius.circular(4),
+          child: CommonCard(
+            type: CommonCardType.filled,
+            radius: 0,
+            child: item,
+          ),
+        );
+      })
+      .separated(const Divider(height: 2, color: Colors.transparent));
   return Column(
     children: [
       if (items.isNotEmpty && title != null)
-        ListHeader(
-          title: title,
-          actions: actions,
-        ),
-      CommonCard(
-        radius: 18,
-        type: CommonCardType.filled,
-        child: Column(
-          children: [
-            ...items,
-          ],
-        ),
-      )
+        ListHeader(title: title, actions: actions),
+      ClipRSuperellipse(
+        borderRadius: BorderRadius.circular(14),
+        child: Column(children: [...genItems]),
+      ),
     ],
   );
 }
@@ -561,18 +538,10 @@ List<Widget> generateInfoSection({
   bool separated = true,
 }) {
   final genItems = separated
-      ? items.separated(
-          const Divider(
-            height: 0,
-          ),
-        )
+      ? items.separated(const Divider(height: 0))
       : items;
   return [
-    if (items.isNotEmpty)
-      InfoHeader(
-        info: info,
-        actions: actions,
-      ),
+    if (items.isNotEmpty) InfoHeader(info: info, actions: actions),
     ...genItems,
   ];
 }
@@ -581,8 +550,6 @@ Widget generateListView(List<Widget> items) {
   return ListView.builder(
     itemCount: items.length,
     itemBuilder: (_, index) => items[index],
-    padding: const EdgeInsets.only(
-      bottom: 16,
-    ),
+    padding: const EdgeInsets.only(bottom: 16),
   );
 }

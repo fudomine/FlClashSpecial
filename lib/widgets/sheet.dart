@@ -29,19 +29,17 @@ class ExtendProps {
   final double? maxWidth;
   final bool useSafeArea;
   final bool blur;
+  final bool forceFull;
 
   const ExtendProps({
     this.maxWidth,
     this.useSafeArea = true,
     this.blur = true,
+    this.forceFull = false,
   });
 }
 
-enum SheetType {
-  page,
-  bottomSheet,
-  sideSheet,
-}
+enum SheetType { page, bottomSheet, sideSheet }
 
 typedef SheetBuilder = Widget Function(BuildContext context, SheetType type);
 
@@ -53,28 +51,24 @@ Future<T?> showSheet<T>({
   final isMobile = globalState.appState.viewMode == ViewMode.mobile;
   return switch (isMobile) {
     true => showModalBottomSheet<T>(
-        context: context,
-        isScrollControlled: props.isScrollControlled,
-        builder: (_) {
-          return SafeArea(
-            child: builder(context, SheetType.bottomSheet),
-          );
-        },
-        showDragHandle: false,
-        useSafeArea: props.useSafeArea,
-      ),
+      context: context,
+      isScrollControlled: props.isScrollControlled,
+      builder: (_) {
+        return SafeArea(child: builder(context, SheetType.bottomSheet));
+      },
+      showDragHandle: false,
+      useSafeArea: props.useSafeArea,
+    ),
     false => showModalSideSheet<T>(
-        useSafeArea: props.useSafeArea,
-        isScrollControlled: props.isScrollControlled,
-        context: context,
-        constraints: BoxConstraints(
-          maxWidth: props.maxWidth ?? 360,
-        ),
-        filter: props.blur ? commonFilter : null,
-        builder: (_) {
-          return builder(context, SheetType.sideSheet);
-        },
-      ),
+      useSafeArea: props.useSafeArea,
+      isScrollControlled: props.isScrollControlled,
+      context: context,
+      constraints: BoxConstraints(maxWidth: props.maxWidth ?? 360),
+      filter: props.blur ? commonFilter : null,
+      builder: (_) {
+        return builder(context, SheetType.sideSheet);
+      },
+    ),
   };
 }
 
@@ -84,22 +78,17 @@ Future<T?> showExtend<T>(
   ExtendProps props = const ExtendProps(),
 }) {
   final isMobile = globalState.appState.viewMode == ViewMode.mobile;
-  return switch (isMobile) {
-    true => BaseNavigator.push(
-        context,
-        builder(context, SheetType.page),
-      ),
+  return switch (isMobile || props.forceFull) {
+    true => BaseNavigator.push(context, builder(context, SheetType.page)),
     false => showModalSideSheet<T>(
-        useSafeArea: props.useSafeArea,
-        context: context,
-        constraints: BoxConstraints(
-          maxWidth: props.maxWidth ?? 360,
-        ),
-        filter: props.blur ? commonFilter : null,
-        builder: (context) {
-          return builder(context, SheetType.sideSheet);
-        },
-      ),
+      useSafeArea: props.useSafeArea,
+      context: context,
+      constraints: BoxConstraints(maxWidth: props.maxWidth ?? 360),
+      filter: props.blur ? commonFilter : null,
+      builder: (context) {
+        return builder(context, SheetType.sideSheet);
+      },
+    ),
   };
 }
 
@@ -132,13 +121,11 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
       automaticallyImplyLeading: bottomSheet
           ? false
           : widget.actions.isEmpty && sideSheet
-              ? false
-              : true,
+          ? false
+          : true,
       centerTitle: bottomSheet,
       backgroundColor: backgroundColor,
-      title: Text(
-        widget.title,
-      ),
+      title: Text(widget.title),
       actions: genActions([
         if (widget.actions.isEmpty && sideSheet) CloseButton(),
         ...widget.actions,
@@ -164,18 +151,15 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
                 height: handleSize.height,
                 width: handleSize.width,
                 decoration: ShapeDecoration(
+                  color: context.colorScheme.onSurfaceVariant,
                   shape: RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.circular(handleSize.height / 2),
                   ),
-                  color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
             appBar,
-            Flexible(
-              flex: 1,
-              child: widget.body,
-            )
+            Flexible(flex: 1, child: widget.body),
           ],
         ),
       );

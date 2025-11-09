@@ -24,11 +24,11 @@ class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
 
   @override
-  ConsumerState<ToolsView> createState() => _ToolboxViewState();
+  ConsumerState<ToolsView> createState() => _ToolViewState();
 }
 
-class _ToolboxViewState extends ConsumerState<ToolsView> {
-  _buildNavigationMenuItem(NavigationItem navigationItem) {
+class _ToolViewState extends ConsumerState<ToolsView> {
+  Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
       leading: navigationItem.icon,
       title: Text(Intl.message(navigationItem.label.name)),
@@ -37,7 +37,8 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
           : null,
       delegate: OpenDelegate(
         title: Intl.message(navigationItem.label.name),
-        widget: navigationItem.view,
+        widget: navigationItem.builder(context),
+        wrap: false,
       ),
     );
   }
@@ -48,11 +49,9 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         for (final navigationItem in navigationItems) ...[
           _buildNavigationMenuItem(navigationItem),
           navigationItems.last != navigationItem
-              ? const Divider(
-                  height: 0,
-                )
+              ? const Divider(height: 0)
               : Container(),
-        ]
+        ],
       ],
     );
   }
@@ -68,7 +67,7 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
     );
   }
 
-  _getSettingList() {
+  List<Widget> _getSettingList() {
     return generateSection(
       title: appLocalizations.settings,
       items: [
@@ -76,8 +75,8 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         _ThemeItem(),
         _BackupItem(),
         if (system.isDesktop) _HotkeyItem(),
-        if (Platform.isWindows) _LoopbackItem(),
-        if (Platform.isAndroid) _AccessItem(),
+        if (system.isWindows) _LoopbackItem(),
+        if (system.isAndroid) _AccessItem(),
         _ConfigItem(),
         _SettingItem(),
       ],
@@ -93,7 +92,7 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
     );
     final items = [
       Consumer(
-        builder: (_, ref, __) {
+        builder: (_, ref, _) {
           final state = ref.watch(moreToolsSelectorStateProvider);
           if (state.navigationItems.isEmpty) {
             return Container();
@@ -101,7 +100,7 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
           return Column(
             children: [
               ListHeader(title: appLocalizations.more),
-              _buildNavigationMenu(state.navigationItems)
+              _buildNavigationMenu(state.navigationItems),
             ],
           );
         },
@@ -109,10 +108,14 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
       ..._getSettingList(),
       ..._getOtherList(vm2.b),
     ];
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (_, index) => items[index],
-      padding: const EdgeInsets.only(bottom: 20),
+    return CommonScaffold(
+      title: appLocalizations.tools,
+      body: ListView.builder(
+        key: toolsStoreKey,
+        itemCount: items.length,
+        itemBuilder: (_, index) => items[index],
+        padding: const EdgeInsets.only(bottom: 20),
+      ),
     );
   }
 }
@@ -127,8 +130,9 @@ class _LocaleItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale =
-        ref.watch(appSettingProvider.select((state) => state.locale));
+    final locale = ref.watch(
+      appSettingProvider.select((state) => state.locale),
+    );
     final subTitle = locale ?? appLocalizations.defaultText;
     final currentLocale = utils.getLocaleForString(locale);
     return ListItem<Locale?>.options(
@@ -139,7 +143,9 @@ class _LocaleItem extends ConsumerWidget {
         title: appLocalizations.language,
         options: [null, ...AppLocalizations.delegate.supportedLocales],
         onChanged: (Locale? locale) {
-          ref.read(appSettingProvider.notifier).updateState(
+          ref
+              .read(appSettingProvider.notifier)
+              .updateState(
                 (state) => state.copyWith(locale: locale?.toString()),
               );
         },
@@ -213,7 +219,7 @@ class _LoopbackItem extends StatelessWidget {
       onTap: () {
         windows?.runas(
           '"${join(dirname(Platform.resolvedExecutable), "EnableLoopback.exe")}"',
-          "",
+          '',
         );
       },
     );
@@ -247,7 +253,7 @@ class _ConfigItem extends StatelessWidget {
       title: Text(appLocalizations.basicConfig),
       subtitle: Text(appLocalizations.basicConfigDesc),
       delegate: OpenDelegate(
-        title: appLocalizations.override,
+        title: appLocalizations.basicConfig,
         widget: const ConfigView(),
       ),
     );
@@ -280,8 +286,8 @@ class _DisclaimerItem extends StatelessWidget {
       leading: const Icon(Icons.gavel),
       title: Text(appLocalizations.disclaimer),
       onTap: () async {
-        final isDisclaimerAccepted =
-            await globalState.appController.showDisclaimer();
+        final isDisclaimerAccepted = await globalState.appController
+            .showDisclaimer();
         if (!isDisclaimerAccepted) {
           globalState.appController.handleExit();
         }

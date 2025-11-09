@@ -39,7 +39,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
     super.dispose();
   }
 
-  _updateInitList() {
+  void _updateInitList() {
     acceptList = globalState.config.vpnProps.accessControl.acceptList;
     rejectList = globalState.config.vpnProps.accessControl.rejectList;
   }
@@ -55,11 +55,9 @@ class _AccessViewState extends ConsumerState<AccessView> {
             rejectList: rejectList,
           ),
         ).then(
-          (_) => setState(
-            () {
-              _updateInitList();
-            },
-          ),
+          (_) => setState(() {
+            _updateInitList();
+          }),
         );
       },
       icon: const Icon(Icons.search),
@@ -70,43 +68,42 @@ class _AccessViewState extends ConsumerState<AccessView> {
     required bool isSelectedAll,
     required List<String> allValueList,
   }) {
-    final tooltip = isSelectedAll
-        ? appLocalizations.cancelSelectAll
-        : appLocalizations.selectAll;
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: () {
-        ref.read(vpnSettingProvider.notifier).updateState((state) {
-          final isAccept =
-              state.accessControl.mode == AccessControlMode.acceptSelected;
-          if (isSelectedAll) {
-            return switch (isAccept) {
-              true => state.copyWith.accessControl(
-                  acceptList: [],
-                ),
-              false => state.copyWith.accessControl(
-                  rejectList: [],
-                ),
-            };
-          } else {
-            return switch (isAccept) {
-              true => state.copyWith.accessControl(
-                  acceptList: allValueList,
-                ),
-              false => state.copyWith.accessControl(
-                  rejectList: allValueList,
-                ),
-            };
-          }
-        });
-      },
-      icon: isSelectedAll
-          ? const Icon(Icons.deselect)
-          : const Icon(Icons.select_all),
+    onPressed() {
+      ref.read(vpnSettingProvider.notifier).updateState((state) {
+        final isAccept =
+            state.accessControl.mode == AccessControlMode.acceptSelected;
+        if (isSelectedAll) {
+          return switch (isAccept) {
+            true => state.copyWith.accessControl(acceptList: []),
+            false => state.copyWith.accessControl(rejectList: []),
+          };
+        } else {
+          return switch (isAccept) {
+            true => state.copyWith.accessControl(acceptList: allValueList),
+            false => state.copyWith.accessControl(rejectList: allValueList),
+          };
+        }
+      });
+    }
+
+    return FadeRotationScaleBox(
+      child: isSelectedAll
+          ? IconButton(
+              key: ValueKey(true),
+              tooltip: appLocalizations.cancelSelectAll,
+              onPressed: onPressed,
+              icon: const Icon(Icons.deselect),
+            )
+          : IconButton(
+              key: ValueKey(false),
+              tooltip: appLocalizations.selectAll,
+              onPressed: onPressed,
+              icon: const Icon(Icons.select_all),
+            ),
     );
   }
 
-  _intelligentSelected() async {
+  Future<void> _intelligentSelected() async {
     final packageNames = ref.read(
       packageListSelectorStateProvider.select(
         (state) => state.list.map((item) => item.packageName),
@@ -115,20 +112,22 @@ class _AccessViewState extends ConsumerState<AccessView> {
     final commonScaffoldState = context.commonScaffoldState;
     if (commonScaffoldState?.mounted != true) return;
     final selectedPackageNames =
-        (await commonScaffoldState?.loadingRun<List<String>>(
-              () async {
-                return await app?.getChinaPackageNames() ?? [];
-              },
-            ))
-                ?.toSet() ??
-            {};
+        (await globalState.appController.safeRun<List<String>>(
+          needLoading: true,
+          () async {
+            return await app?.getChinaPackageNames() ?? [];
+          },
+        ))?.toSet() ??
+        {};
     final acceptList = packageNames
         .where((item) => !selectedPackageNames.contains(item))
         .toList();
     final rejectList = packageNames
         .where((item) => selectedPackageNames.contains(item))
         .toList();
-    ref.read(vpnSettingProvider.notifier).updateState(
+    ref
+        .read(vpnSettingProvider.notifier)
+        .updateState(
           (state) => state.copyWith.accessControl(
             acceptList: acceptList,
             rejectList: rejectList,
@@ -141,9 +140,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       onPressed: () async {
         final res = await showSheet<int>(
           context: context,
-          props: SheetProps(
-            isScrollControlled: true,
-          ),
+          props: SheetProps(isScrollControlled: true),
           builder: (_, type) {
             return AdaptiveSheetScaffold(
               type: type,
@@ -160,21 +157,17 @@ class _AccessViewState extends ConsumerState<AccessView> {
     );
   }
 
-  _handleSelected(List<String> valueList, Package package, bool? value) {
+  void _handleSelected(List<String> valueList, Package package, bool? value) {
     if (value == true) {
       valueList.add(package.packageName);
     } else {
       valueList.remove(package.packageName);
     }
     ref.read(vpnSettingProvider.notifier).updateState((state) {
-      return switch (
-          state.accessControl.mode == AccessControlMode.acceptSelected) {
-        true => state.copyWith.accessControl(
-            acceptList: valueList,
-          ),
-        false => state.copyWith.accessControl(
-            rejectList: valueList,
-          ),
+      return switch (state.accessControl.mode ==
+          AccessControlMode.acceptSelected) {
+        true => state.copyWith.accessControl(acceptList: valueList),
+        false => state.copyWith.accessControl(rejectList: valueList),
       };
     });
   }
@@ -205,10 +198,10 @@ class _AccessViewState extends ConsumerState<AccessView> {
             delegate: SwitchDelegate(
               value: accessControl.enable,
               onChanged: (enable) {
-                ref.read(vpnSettingProvider.notifier).updateState(
-                      (state) => state.copyWith.accessControl(
-                        enable: enable,
-                      ),
+                ref
+                    .read(vpnSettingProvider.notifier)
+                    .updateState(
+                      (state) => state.copyWith.accessControl(enable: enable),
                     );
               },
             ),
@@ -216,9 +209,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
         ),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Divider(
-            height: 12,
-          ),
+          child: Divider(height: 12),
         ),
         Flexible(
           child: DisabledMask(
@@ -254,36 +245,30 @@ class _AccessViewState extends ConsumerState<AccessView> {
                                               .textTheme
                                               .labelLarge
                                               ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                               ),
                                         ),
                                       ),
-                                      const Flexible(
-                                        child: SizedBox(
-                                          width: 8,
-                                        ),
-                                      ),
+                                      const Flexible(child: SizedBox(width: 8)),
                                       Flexible(
                                         child: Text(
-                                          "${valueList.length}",
+                                          '${valueList.length}',
                                           style: Theme.of(context)
                                               .textTheme
                                               .labelLarge
                                               ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
                                               ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Flexible(
-                                  child: Text(describe),
-                                )
+                                Flexible(child: Text(describe)),
                               ],
                             ),
                           ),
@@ -292,9 +277,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Flexible(
-                              child: _buildSearchButton(),
-                            ),
+                            Flexible(child: _buildSearchButton()),
                             Flexible(
                               child: _buildSelectedAllButton(
                                 isSelectedAll:
@@ -302,9 +285,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                                 allValueList: packageNameList,
                               ),
                             ),
-                            Flexible(
-                              child: _buildSettingButton(),
-                            ),
+                            Flexible(child: _buildSettingButton()),
                           ],
                         ),
                       ],
@@ -314,41 +295,42 @@ class _AccessViewState extends ConsumerState<AccessView> {
                 Expanded(
                   flex: 1,
                   child: FutureBuilder(
-                      future: _completer.future,
-                      builder: (_, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        return packages.isEmpty
-                            ? NullStatus(
-                                label: appLocalizations.noData,
-                              )
-                            : CommonScrollBar(
+                    future: _completer.future,
+                    builder: (_, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      return packages.isEmpty
+                          ? NullStatus(label: appLocalizations.noData)
+                          : CommonScrollBar(
+                              controller: _controller,
+                              child: ListView.builder(
                                 controller: _controller,
-                                child: ListView.builder(
-                                  controller: _controller,
-                                  itemCount: packages.length,
-                                  itemExtent: 72,
-                                  itemBuilder: (_, index) {
-                                    final package = packages[index];
-                                    return PackageListItem(
-                                      key: Key(package.packageName),
-                                      package: package,
-                                      value: valueList
-                                          .contains(package.packageName),
-                                      isActive: accessControl.enable,
-                                      onChanged: (value) {
-                                        _handleSelected(
-                                            valueList, package, value);
-                                      },
-                                    );
-                                  },
-                                ),
-                              );
-                      }),
-                )
+                                itemCount: packages.length,
+                                itemExtent: 72,
+                                itemBuilder: (_, index) {
+                                  final package = packages[index];
+                                  return PackageListItem(
+                                    key: Key(package.packageName),
+                                    package: package,
+                                    value: valueList.contains(
+                                      package.packageName,
+                                    ),
+                                    isActive: accessControl.enable,
+                                    onChanged: (value) {
+                                      _handleSelected(
+                                        valueList,
+                                        package,
+                                        value,
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            );
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -399,22 +381,15 @@ class PackageListItem extends StatelessWidget {
           ),
           title: Text(
             package.label,
-            style: const TextStyle(
-              overflow: TextOverflow.ellipsis,
-            ),
+            style: const TextStyle(overflow: TextOverflow.ellipsis),
             maxLines: 1,
           ),
           subtitle: Text(
             package.packageName,
-            style: const TextStyle(
-              overflow: TextOverflow.ellipsis,
-            ),
+            style: const TextStyle(overflow: TextOverflow.ellipsis),
             maxLines: 1,
           ),
-          delegate: CheckboxDelegate(
-            value: value,
-            onChanged: onChanged,
-          ),
+          delegate: CheckboxDelegate(value: value, onChanged: onChanged),
         ),
       ),
     );
@@ -443,9 +418,7 @@ class AccessControlSearchDelegate extends SearchDelegate {
         },
         icon: const Icon(Icons.clear),
       ),
-      const SizedBox(
-        width: 8,
-      )
+      const SizedBox(width: 8),
     ];
   }
 
@@ -459,22 +432,22 @@ class AccessControlSearchDelegate extends SearchDelegate {
     );
   }
 
-  _handleSelected(
-      WidgetRef ref, List<String> valueList, Package package, bool? value) {
+  void _handleSelected(
+    WidgetRef ref,
+    List<String> valueList,
+    Package package,
+    bool? value,
+  ) {
     if (value == true) {
       valueList.add(package.packageName);
     } else {
       valueList.remove(package.packageName);
     }
     ref.read(vpnSettingProvider.notifier).updateState((state) {
-      return switch (
-          state.accessControl.mode == AccessControlMode.acceptSelected) {
-        true => state.copyWith.accessControl(
-            acceptList: valueList,
-          ),
-        false => state.copyWith.accessControl(
-            rejectList: valueList,
-          ),
+      return switch (state.accessControl.mode ==
+          AccessControlMode.acceptSelected) {
+        true => state.copyWith.accessControl(acceptList: valueList),
+        false => state.copyWith.accessControl(rejectList: valueList),
       };
     });
   }
@@ -482,7 +455,7 @@ class AccessControlSearchDelegate extends SearchDelegate {
   Widget _packageList() {
     final lowQuery = query.toLowerCase();
     return Consumer(
-      builder: (context, ref, __) {
+      builder: (context, ref, _) {
         final vm3 = ref.watch(
           packageListSelectorStateProvider.select(
             (state) => VM3(
@@ -520,12 +493,7 @@ class AccessControlSearchDelegate extends SearchDelegate {
                 value: valueList.contains(package.packageName),
                 isActive: isAccessControl,
                 onChanged: (value) {
-                  _handleSelected(
-                    ref,
-                    valueList,
-                    package,
-                    value,
-                  );
+                  _handleSelected(ref, valueList, package, value);
                 },
               );
             },
@@ -547,9 +515,7 @@ class AccessControlSearchDelegate extends SearchDelegate {
 }
 
 class AccessControlPanel extends ConsumerStatefulWidget {
-  const AccessControlPanel({
-    super.key,
-  });
+  const AccessControlPanel({super.key});
 
   @override
   ConsumerState createState() => _AccessControlPanelState();
@@ -594,7 +560,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
           child: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final accessControlMode = ref.watch(
                 vpnSettingProvider.select((state) => state.accessControl.mode),
               );
@@ -609,18 +575,19 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                       ),
                       isSelected: accessControlMode == item,
                       onPressed: () {
-                        ref.read(vpnSettingProvider.notifier).updateState(
-                              (state) => state.copyWith.accessControl(
-                                mode: item,
-                              ),
+                        ref
+                            .read(vpnSettingProvider.notifier)
+                            .updateState(
+                              (state) =>
+                                  state.copyWith.accessControl(mode: item),
                             );
                       },
-                    )
+                    ),
                 ],
               );
             },
           ),
-        )
+        ),
       ],
     );
   }
@@ -633,7 +600,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
           child: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final accessSortType = ref.watch(
                 vpnSettingProvider.select((state) => state.accessControl.sort),
               );
@@ -648,10 +615,11 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                       ),
                       isSelected: accessSortType == item,
                       onPressed: () {
-                        ref.read(vpnSettingProvider.notifier).updateState(
-                              (state) => state.copyWith.accessControl(
-                                sort: item,
-                              ),
+                        ref
+                            .read(vpnSettingProvider.notifier)
+                            .updateState(
+                              (state) =>
+                                  state.copyWith.accessControl(sort: item),
                             );
                       },
                     ),
@@ -672,7 +640,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           scrollDirection: Axis.horizontal,
           child: Consumer(
-            builder: (_, ref, __) {
+            builder: (_, ref, _) {
               final vm2 = ref.watch(
                 vpnSettingProvider.select(
                   (state) => VM2(
@@ -688,7 +656,9 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                     appLocalizations.systemApp,
                     isSelected: vm2.a == false,
                     onPressed: () {
-                      ref.read(vpnSettingProvider.notifier).updateState(
+                      ref
+                          .read(vpnSettingProvider.notifier)
+                          .updateState(
                             (state) => state.copyWith.accessControl(
                               isFilterSystemApp: !vm2.a,
                             ),
@@ -699,50 +669,46 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                     appLocalizations.noNetworkApp,
                     isSelected: vm2.b == false,
                     onPressed: () {
-                      ref.read(vpnSettingProvider.notifier).updateState(
+                      ref
+                          .read(vpnSettingProvider.notifier)
+                          .updateState(
                             (state) => state.copyWith.accessControl(
                               isFilterNonInternetApp: !vm2.b,
                             ),
                           );
                     },
-                  )
+                  ),
                 ],
               );
             },
           ),
-        )
+        ),
       ],
     );
   }
 
-  _copyToClipboard() async {
-    await globalState.safeRun(() {
+  Future<void> _copyToClipboard() async {
+    await globalState.appController.safeRun(() {
       final data = globalState.config.vpnProps.accessControl.toJson();
-      Clipboard.setData(
-        ClipboardData(
-          text: json.encode(data),
-        ),
-      );
+      Clipboard.setData(ClipboardData(text: json.encode(data)));
     });
     if (!mounted) return;
     Navigator.of(context).pop();
   }
 
-  _pasteToClipboard() async {
-    await globalState.safeRun(
-      () async {
-        final data = await Clipboard.getData('text/plain');
-        final text = data?.text;
-        if (text == null) return;
-        ref.read(vpnSettingProvider.notifier).updateState(
-              (state) => state.copyWith(
-                accessControl: AccessControl.fromJson(
-                  json.decode(text),
-                ),
-              ),
-            );
-      },
-    );
+  Future<void> _pasteToClipboard() async {
+    await globalState.appController.safeRun(() async {
+      final data = await Clipboard.getData('text/plain');
+      final text = data?.text;
+      if (text == null) return;
+      ref
+          .read(vpnSettingProvider.notifier)
+          .updateState(
+            (state) => state.copyWith(
+              accessControl: AccessControl.fromJson(json.decode(text)),
+            ),
+          );
+    });
     if (!mounted) return;
     Navigator.of(context).pop();
   }
@@ -752,9 +718,7 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
       title: appLocalizations.action,
       items: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Wrap(
             runSpacing: 16,
             spacing: 16,
@@ -775,10 +739,10 @@ class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
                 avatar: const Icon(Icons.content_copy),
                 label: appLocalizations.clipboardExport,
                 onPressed: _copyToClipboard,
-              )
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

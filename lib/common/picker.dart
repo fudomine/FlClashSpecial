@@ -20,9 +20,9 @@ class Picker {
     final path = await FilePicker.platform.saveFile(
       fileName: fileName,
       initialDirectory: await appPath.downloadDirPath,
-      bytes: Platform.isAndroid ? bytes : null,
+      bytes: system.isAndroid ? bytes : null,
     );
-    if (!Platform.isAndroid && path != null) {
+    if (!system.isAndroid && path != null) {
       final file = await File(path).create(recursive: true);
       await file.writeAsBytes(bytes);
     }
@@ -35,9 +35,10 @@ class Picker {
       return null;
     }
     final controller = MobileScannerController();
-    final capture = await controller.analyzeImage(xFile.path, formats: [
-      BarcodeFormat.qrCode,
-    ]);
+    final capture = await controller.analyzeImage(
+      xFile.path,
+      formats: [BarcodeFormat.qrCode],
+    );
     final result = capture?.barcodes.first.rawValue;
     if (result == null || !result.isUrl) {
       throw appLocalizations.pleaseUploadValidQrcode;

@@ -11,35 +11,29 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter/cupertino.dart';
 
 class Request {
-  late final Dio _dio;
+  late final Dio dio;
   late final Dio _clashDio;
   String? userAgent;
 
   Request() {
-    _dio = Dio(
-      BaseOptions(
-        headers: {
-          "User-Agent": browserUa,
-        },
-      ),
-    );
+    dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
     _clashDio = Dio();
-    _clashDio.httpClientAdapter = IOHttpClientAdapter(createHttpClient: () {
-      final client = HttpClient();
-      client.findProxy = (Uri uri) {
-        client.userAgent = globalState.ua;
-        return FlClashHttpOverrides.handleFindProxy(uri);
-      };
-      return client;
-    });
+    _clashDio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.findProxy = (Uri uri) {
+          client.userAgent = globalState.ua;
+          return FlClashHttpOverrides.handleFindProxy(uri);
+        };
+        return client;
+      },
+    );
   }
 
   Future<Response> getFileResponseForUrl(String url) async {
     final response = await _clashDio.get(
       url,
-      options: Options(
-        responseType: ResponseType.bytes,
-      ),
+      options: Options(responseType: ResponseType.bytes),
     );
     return response;
   }
@@ -47,20 +41,16 @@ class Request {
   Future<Response> getTextResponseForUrl(String url) async {
     final response = await _clashDio.get(
       url,
-      options: Options(
-        responseType: ResponseType.plain,
-      ),
+      options: Options(responseType: ResponseType.plain),
     );
     return response;
   }
 
   Future<MemoryImage?> getImage(String url) async {
     if (url.isEmpty) return null;
-    final response = await _dio.get<Uint8List>(
+    final response = await dio.get<Uint8List>(
       url,
-      options: Options(
-        responseType: ResponseType.bytes,
-      ),
+      options: Options(responseType: ResponseType.bytes),
     );
     final data = response.data;
     if (data == null) return null;
@@ -85,38 +75,48 @@ class Request {
   }
 
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
-    "https://ipwho.is/": IpInfo.fromIpwhoIsJson,
-    "https://api.ip.sb/geoip/": IpInfo.fromIpSbJson,
-    "https://ipapi.co/json/": IpInfo.fromIpApiCoJson,
-    "https://ipinfo.io/json/": IpInfo.fromIpInfoIoJson,
+    'https://ipwho.is': IpInfo.fromIpWhoIsJson,
+    'https://api.myip.com': IpInfo.fromMyIpJson,
+    'https://ipapi.co/json': IpInfo.fromIpApiCoJson,
+    'https://ident.me/json': IpInfo.fromIdentMeJson,
+    'http://ip-api.com/json': IpInfo.fromIpAPIJson,
+    'https://api.ip.sb/geoip': IpInfo.fromIpSbJson,
+    'https://ipinfo.io/json': IpInfo.fromIpInfoIoJson,
   };
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
     var failureCount = 0;
     final futures = _ipInfoSources.entries.map((source) async {
       final Completer<Result<IpInfo?>> completer = Completer();
-      final future = Dio().get<Map<String, dynamic>>(
-        source.key,
-        cancelToken: cancelToken,
-        options: Options(
-          responseType: ResponseType.json,
-        ),
-      );
-      future.then((res) {
-        if (res.statusCode == HttpStatus.ok && res.data != null) {
-          completer.complete(Result.success(source.value(res.data!)));
-        } else {
-          failureCount++;
-          if (failureCount == _ipInfoSources.length) {
-            completer.complete(Result.success(null));
-          }
+      handleFailRes() {
+        if (!completer.isCompleted && failureCount == _ipInfoSources.length) {
+          completer.complete(Result.success(null));
         }
-      }).catchError((e) {
-        failureCount++;
-        if (e == DioExceptionType.cancel) {
-          completer.complete(Result.error("cancelled"));
-        }
-      });
+      }
+
+      final future = dio
+          .get<Map<String, dynamic>>(
+            source.key,
+            cancelToken: cancelToken,
+            options: Options(responseType: ResponseType.json),
+          )
+          .timeout(const Duration(seconds: 10));
+      future
+          .then((res) {
+            if (res.statusCode == HttpStatus.ok && res.data != null) {
+              completer.complete(Result.success(source.value(res.data!)));
+              return;
+            }
+            failureCount++;
+            handleFailRes();
+          })
+          .catchError((e) {
+            failureCount++;
+            if (e is DioException && e.type == DioExceptionType.cancel) {
+              completer.complete(Result.error('cancelled'));
+            }
+            handleFailRes();
+          });
       return completer.future;
     });
     final res = await Future.any(futures);
@@ -126,18 +126,12 @@ class Request {
 
   Future<bool> pingHelper() async {
     try {
-      final response = await _dio
+      final response = await dio
           .get(
-            "http://$localhost:$helperPort/ping",
-            options: Options(
-              responseType: ResponseType.plain,
-            ),
+            'http://$localhost:$helperPort/ping',
+            options: Options(responseType: ResponseType.plain),
           )
-          .timeout(
-            const Duration(
-              milliseconds: 2000,
-            ),
-          );
+          .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
@@ -149,22 +143,13 @@ class Request {
 
   Future<bool> startCoreByHelper(String arg) async {
     try {
-      final response = await _dio
+      final response = await dio
           .post(
-            "http://$localhost:$helperPort/start",
-            data: json.encode({
-              "path": appPath.corePath,
-              "arg": arg,
-            }),
-            options: Options(
-              responseType: ResponseType.plain,
-            ),
+            'http://$localhost:$helperPort/start',
+            data: json.encode({'path': appPath.corePath, 'arg': arg}),
+            options: Options(responseType: ResponseType.plain),
           )
-          .timeout(
-            const Duration(
-              milliseconds: 2000,
-            ),
-          );
+          .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }
@@ -177,18 +162,12 @@ class Request {
 
   Future<bool> stopCoreByHelper() async {
     try {
-      final response = await _dio
+      final response = await dio
           .post(
-            "http://$localhost:$helperPort/stop",
-            options: Options(
-              responseType: ResponseType.plain,
-            ),
+            'http://$localhost:$helperPort/stop',
+            options: Options(responseType: ResponseType.plain),
           )
-          .timeout(
-            const Duration(
-              milliseconds: 2000,
-            ),
-          );
+          .timeout(const Duration(milliseconds: 2000));
       if (response.statusCode != HttpStatus.ok) {
         return false;
       }

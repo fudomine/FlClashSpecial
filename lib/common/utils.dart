@@ -8,7 +8,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lpinyin/lpinyin.dart';
 
 class Utils {
   Color? getDelayColor(int? delay) {
@@ -21,16 +20,15 @@ class Utils {
   String get id {
     final timestamp = DateTime.now().microsecondsSinceEpoch;
     final random = Random();
-    final randomStr =
-        String.fromCharCodes(List.generate(8, (_) => random.nextInt(26) + 97));
-    return "$timestamp$randomStr";
+    final randomStr = String.fromCharCodes(
+      List.generate(8, (_) => random.nextInt(26) + 97),
+    );
+    return '$timestamp$randomStr';
   }
 
   String getDateStringLast2(int value) {
-    var valueRaw = "0$value";
-    return valueRaw.substring(
-      valueRaw.length - 2,
-    );
+    var valueRaw = '0$value';
+    return valueRaw.substring(valueRaw.length - 2);
   }
 
   String generateRandomString({int minLength = 10, int maxLength = 100}) {
@@ -43,8 +41,9 @@ class Utils {
     String result = '';
     for (int i = 0; i < length; i++) {
       if (random.nextBool()) {
-        result +=
-            String.fromCharCode(0x4E00 + random.nextInt(0x9FA5 - 0x4E00 + 1));
+        result += String.fromCharCode(
+          0x4E00 + random.nextInt(0x9FA5 - 0x4E00 + 1),
+        );
       } else {
         result += latinChars[random.nextInt(latinChars.length)];
       }
@@ -60,8 +59,9 @@ class Utils {
     bytes[6] = (bytes[6] & 0x0F) | 0x40;
     bytes[8] = (bytes[8] & 0x3F) | 0x80;
 
-    final hex =
-        bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+    final hex = bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join();
 
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
   }
@@ -73,7 +73,7 @@ class Utils {
     var inMinutes = difference.inMinutes;
     var inSeconds = difference.inSeconds;
 
-    return "${getDateStringLast2(inHours)}:${getDateStringLast2(inMinutes)}:${getDateStringLast2(inSeconds)}";
+    return '${getDateStringLast2(inHours)}:${getDateStringLast2(inMinutes)}:${getDateStringLast2(inSeconds)}';
   }
 
   String getTimeText(int? timeStamp) {
@@ -83,17 +83,17 @@ class Utils {
     final diff = timeStamp / 1000;
     final inHours = (diff / 3600).floor();
     if (inHours > 99) {
-      return "99:59:59";
+      return '99:59:59';
     }
     final inMinutes = (diff / 60 % 60).floor();
     final inSeconds = (diff % 60).floor();
 
-    return "${getDateStringLast2(inHours)}:${getDateStringLast2(inMinutes)}:${getDateStringLast2(inSeconds)}";
+    return '${getDateStringLast2(inHours)}:${getDateStringLast2(inMinutes)}:${getDateStringLast2(inSeconds)}';
   }
 
   Locale? getLocaleForString(String? localString) {
     if (localString == null) return null;
-    var localSplit = localString.split("_");
+    var localSplit = localString.split('_');
     if (localSplit.length == 1) {
       return Locale(localSplit[0]);
     }
@@ -102,9 +102,10 @@ class Utils {
     }
     if (localSplit.length == 3) {
       return Locale.fromSubtags(
-          languageCode: localSplit[0],
-          scriptCode: localSplit[1],
-          countryCode: localSplit[2]);
+        languageCode: localSplit[0],
+        scriptCode: localSplit[1],
+        countryCode: localSplit[2],
+      );
     }
     return null;
   }
@@ -137,18 +138,16 @@ class Utils {
       final number = int.parse(match[1] ?? '0') + 1;
       return label.replaceFirst(reg, '($number)', label.length - 3 - 1);
     } else {
-      return "$label(1)";
+      return '$label(1)';
     }
   }
 
-  String getTrayIconPath({
-    required Brightness brightness,
-  }) {
-    if (Platform.isMacOS) {
-      return "assets/images/icon_white.png";
+  String getTrayIconPath({required Brightness brightness}) {
+    if (system.isMacOS) {
+      return 'assets/images/icon_white.png';
     }
-    final suffix = Platform.isWindows ? "ico" : "png";
-    return "assets/images/icon.$suffix";
+    final suffix = system.isWindows ? 'ico' : 'png';
+    return 'assets/images/icon.$suffix';
     // return switch (brightness) {
     //   Brightness.dark => "assets/images/icon_white.$suffix",
     //   Brightness.light => "assets/images/icon_black.$suffix",
@@ -178,26 +177,30 @@ class Utils {
     return build1.compareTo(build2);
   }
 
-  String getPinyin(String value) {
-    return value.isNotEmpty
-        ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
-        : "";
-  }
+  // String getPinyin(String value) {
+  //   return value.isNotEmpty
+  //       ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
+  //       : '';
+  // }
 
   String? getFileNameForDisposition(String? disposition) {
     if (disposition == null) return null;
     final parseValue = HeaderValue.parse(disposition);
     final parameters = parseValue.parameters;
-    final fileNamePointKey = parameters.keys
-        .firstWhere((key) => key == "filename*", orElse: () => "");
+    final fileNamePointKey = parameters.keys.firstWhere(
+      (key) => key == 'filename*',
+      orElse: () => '',
+    );
     if (fileNamePointKey.isNotEmpty) {
       final res = parameters[fileNamePointKey]?.split("''") ?? [];
       if (res.length >= 2) {
         return Uri.decodeComponent(res[1]);
       }
     }
-    final fileNameKey = parameters.keys
-        .firstWhere((key) => key == "filename", orElse: () => "");
+    final fileNameKey = parameters.keys.firstWhere(
+      (key) => key == 'filename',
+      orElse: () => '',
+    );
     if (fileNameKey.isEmpty) return null;
     return parameters[fileNameKey];
   }
@@ -224,7 +227,7 @@ class Utils {
   }
 
   int getProxiesColumns(double viewWidth, ProxiesLayout proxiesLayout) {
-    final columns = max((viewWidth / 300).ceil(), 2);
+    final columns = max((viewWidth / 250).ceil(), 2);
     return switch (proxiesLayout) {
       ProxiesLayout.tight => columns + 1,
       ProxiesLayout.standard => columns,
@@ -233,24 +236,12 @@ class Utils {
   }
 
   int getProfilesColumns(double viewWidth) {
-    return max((viewWidth / 320).floor(), 1);
+    return max((viewWidth / 280).floor(), 1);
   }
 
-  final _indexPrimary = [
-    50,
-    100,
-    200,
-    300,
-    400,
-    500,
-    600,
-    700,
-    800,
-    850,
-    900,
-  ];
+  final _indexPrimary = [50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900];
 
-  _createPrimarySwatch(Color color) {
+  MaterialColor _createPrimarySwatch(Color color) {
     final Map<int, Color> swatch = <int, Color>{};
     final int a = color.alpha8bit;
     final int r = color.red8bit;
@@ -294,24 +285,23 @@ class Utils {
   }
 
   String getBackupFileName() {
-    return "${appName}_backup_${DateTime.now().show}.zip";
+    return '${appName}_backup_${DateTime.now().show}.zip';
   }
 
   String get logFile {
-    return "${appName}_${DateTime.now().show}.log";
+    return '${appName}_${DateTime.now().show}.log';
   }
 
   Future<String?> getLocalIpAddress() async {
-    List<NetworkInterface> interfaces = await NetworkInterface.list(
-      includeLoopback: false,
-    )
-      ..sort((a, b) {
-        if (a.isWifi && !b.isWifi) return -1;
-        if (!a.isWifi && b.isWifi) return 1;
-        if (a.includesIPv4 && !b.includesIPv4) return -1;
-        if (!a.includesIPv4 && b.includesIPv4) return 1;
-        return 0;
-      });
+    List<NetworkInterface> interfaces =
+        await NetworkInterface.list(includeLoopback: false)
+          ..sort((a, b) {
+            if (a.isWifi && !b.isWifi) return -1;
+            if (!a.isWifi && b.isWifi) return 1;
+            if (a.includesIPv4 && !b.includesIPv4) return -1;
+            if (!a.includesIPv4 && b.includesIPv4) return 1;
+            return 0;
+          });
     for (final interface in interfaces) {
       final addresses = interface.addresses;
       if (addresses.isEmpty) {
@@ -324,70 +314,23 @@ class Utils {
       });
       return addresses.first.address;
     }
-    return "";
+    return '';
   }
 
   SingleActivator controlSingleActivator(LogicalKeyboardKey trigger) {
-    final control = Platform.isMacOS ? false : true;
-    return SingleActivator(
-      trigger,
-      control: control,
-      meta: !control,
-    );
+    final control = system.isMacOS ? false : true;
+    return SingleActivator(trigger, control: control, meta: !control);
   }
 
-  // dynamic convertYamlNode(dynamic node) {
-  //   if (node is YamlMap) {
-  //     final map = <String, dynamic>{};
-  //     YamlNode? mergeKeyNode;
-  //     for (final entry in node.nodes.entries) {
-  //       if (entry.key is YamlScalar &&
-  //           (entry.key as YamlScalar).value == '<<') {
-  //         mergeKeyNode = entry.value;
-  //         break;
-  //       }
-  //     }
-  //     if (mergeKeyNode != null) {
-  //       final mergeValue = mergeKeyNode.value;
-  //       if (mergeValue is YamlMap) {
-  //         map.addAll(convertYamlNode(mergeValue) as Map<String, dynamic>);
-  //       } else if (mergeValue is YamlList) {
-  //         for (final node in mergeValue.nodes) {
-  //           if (node.value is YamlMap) {
-  //             map.addAll(convertYamlNode(node.value) as Map<String, dynamic>);
-  //           }
-  //         }
-  //       }
-  //     }
-  //
-  //     node.nodes.forEach((key, value) {
-  //       String stringKey;
-  //       if (key is YamlScalar) {
-  //         stringKey = key.value.toString();
-  //       } else {
-  //         stringKey = key.toString();
-  //       }
-  //       map[stringKey] = convertYamlNode(value.value);
-  //     });
-  //     return map;
-  //   } else if (node is YamlList) {
-  //     final list = <dynamic>[];
-  //     for (final item in node.nodes) {
-  //       list.add(convertYamlNode(item.value));
-  //     }
-  //     return list;
-  //   } else if (node is YamlScalar) {
-  //     return node.value;
-  //   }
-  //   return node;
-  // }
-
-  FutureOr<T> handleWatch<T>(Function function) async {
+  FutureOr<T> handleWatch<T>({
+    required Function function,
+    required void Function(T data, int elapsedMilliseconds) onWatch,
+  }) async {
     if (kDebugMode) {
       final stopwatch = Stopwatch()..start();
       final res = await function();
       stopwatch.stop();
-      commonPrint.log('耗时：${stopwatch.elapsedMilliseconds} ms');
+      onWatch(res, stopwatch.elapsedMilliseconds);
       return res;
     }
     return await function();

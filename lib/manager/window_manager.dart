@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,10 +12,7 @@ import 'package:window_manager/window_manager.dart';
 class WindowManager extends ConsumerStatefulWidget {
   final Widget child;
 
-  const WindowManager({
-    super.key,
-    required this.child,
-  });
+  const WindowManager({super.key, required this.child});
 
   @override
   ConsumerState<WindowManager> createState() => _WindowContainerState();
@@ -33,19 +28,16 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void initState() {
     super.initState();
-    ref.listenManual(
-      appSettingProvider.select((state) => state.autoLaunch),
-      (prev, next) {
-        if (prev != next) {
-          debouncer.call(
-            FunctionTag.autoLaunch,
-            () {
-              autoLaunch?.updateStatus(next);
-            },
-          );
-        }
-      },
-    );
+    ref.listenManual(appSettingProvider.select((state) => state.autoLaunch), (
+      prev,
+      next,
+    ) {
+      if (prev != next) {
+        debouncer.call(FunctionTag.autoLaunch, () {
+          autoLaunch?.updateStatus(next);
+        });
+      }
+    });
     windowExtManager.addListener(this);
     windowManager.addListener(this);
   }
@@ -59,7 +51,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void onWindowFocus() {
     super.onWindowFocus();
-    commonPrint.log("focus");
+    commonPrint.log('focus');
     render?.resume();
   }
 
@@ -73,11 +65,10 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   Future<void> onWindowMoved() async {
     super.onWindowMoved();
     final offset = await windowManager.getPosition();
-    ref.read(windowSettingProvider.notifier).updateState(
-          (state) => state.copyWith(
-            top: offset.dy,
-            left: offset.dx,
-          ),
+    ref
+        .read(windowSettingProvider.notifier)
+        .updateState(
+          (state) => state.copyWith(top: offset.dy, left: offset.dx),
         );
   }
 
@@ -85,25 +76,24 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   Future<void> onWindowResized() async {
     super.onWindowResized();
     final size = await windowManager.getSize();
-    ref.read(windowSettingProvider.notifier).updateState(
-          (state) => state.copyWith(
-            width: size.width,
-            height: size.height,
-          ),
+    ref
+        .read(windowSettingProvider.notifier)
+        .updateState(
+          (state) => state.copyWith(width: size.width, height: size.height),
         );
   }
 
   @override
   void onWindowMinimize() async {
     globalState.appController.savePreferencesDebounce();
-    commonPrint.log("minimize");
+    commonPrint.log('minimize');
     render?.pause();
     super.onWindowMinimize();
   }
 
   @override
   void onWindowRestore() {
-    commonPrint.log("restore");
+    commonPrint.log('restore');
     render?.resume();
     super.onWindowRestore();
   }
@@ -119,30 +109,23 @@ class _WindowContainerState extends ConsumerState<WindowManager>
 class WindowHeaderContainer extends StatelessWidget {
   final Widget child;
 
-  const WindowHeaderContainer({
-    super.key,
-    required this.child,
-  });
+  const WindowHeaderContainer({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Consumer(
       builder: (_, ref, child) {
+        final isMobileView = ref.watch(isMobileViewProvider);
         final version = ref.watch(versionProvider);
-        if (version <= 10 && Platform.isMacOS) {
+        if ((version <= 10 || !isMobileView) && system.isMacOS) {
           return child!;
         }
         return Stack(
           children: [
             Column(
               children: [
-                SizedBox(
-                  height: kHeaderHeight,
-                ),
-                Expanded(
-                  flex: 1,
-                  child: child!,
-                ),
+                SizedBox(height: kHeaderHeight),
+                Expanded(flex: 1, child: child!),
               ],
             ),
             const WindowHeader(),
@@ -171,7 +154,7 @@ class _WindowHeaderState extends State<WindowHeader> {
     _initNotifier();
   }
 
-  _initNotifier() async {
+  Future<void> _initNotifier() async {
     isMaximizedNotifier.value = await windowManager.isMaximized();
     isPinNotifier.value = await windowManager.isAlwaysOnTop();
   }
@@ -183,7 +166,7 @@ class _WindowHeaderState extends State<WindowHeader> {
     super.dispose();
   }
 
-  _updateMaximized() async {
+  Future<void> _updateMaximized() async {
     final isMaximized = await windowManager.isMaximized();
     switch (isMaximized) {
       case true:
@@ -196,13 +179,13 @@ class _WindowHeaderState extends State<WindowHeader> {
     isMaximizedNotifier.value = await windowManager.isMaximized();
   }
 
-  _updatePin() async {
+  Future<void> _updatePin() async {
     final isAlwaysOnTop = await windowManager.isAlwaysOnTop();
     await windowManager.setAlwaysOnTop(!isAlwaysOnTop);
     isPinNotifier.value = await windowManager.isAlwaysOnTop();
   }
 
-  _buildActions() {
+  Widget _buildActions() {
     return Row(
       children: [
         IconButton(
@@ -211,14 +194,10 @@ class _WindowHeaderState extends State<WindowHeader> {
           },
           icon: ValueListenableBuilder(
             valueListenable: isPinNotifier,
-            builder: (_, value, ___) {
+            builder: (_, value, _) {
               return value
-                  ? const Icon(
-                      Icons.push_pin,
-                    )
-                  : const Icon(
-                      Icons.push_pin_outlined,
-                    );
+                  ? const Icon(Icons.push_pin)
+                  : const Icon(Icons.push_pin_outlined);
             },
           ),
         ),
@@ -234,15 +213,10 @@ class _WindowHeaderState extends State<WindowHeader> {
           },
           icon: ValueListenableBuilder(
             valueListenable: isMaximizedNotifier,
-            builder: (_, value, ___) {
+            builder: (_, value, _) {
               return value
-                  ? const Icon(
-                      Icons.filter_none,
-                      size: 20,
-                    )
-                  : const Icon(
-                      Icons.crop_square,
-                    );
+                  ? const Icon(Icons.filter_none, size: 20)
+                  : const Icon(Icons.crop_square);
             },
           ),
         ),
@@ -280,20 +254,11 @@ class _WindowHeaderState extends State<WindowHeader> {
               ),
             ),
           ),
-          if (Platform.isMacOS)
-            const Text(
-              appName,
-            )
+          if (system.isMacOS)
+            const Text(appName)
           else ...[
-            const Positioned(
-              left: 0,
-              child: AppIcon(),
-            ),
-            Positioned(
-              right: 0,
-              child: _buildActions(),
-            ),
-          ]
+            Positioned(right: 0, child: _buildActions()),
+          ],
         ],
       ),
     );
@@ -306,24 +271,16 @@ class AppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 8),
-      child: const Row(
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: CircleAvatar(
-              foregroundImage: AssetImage("assets/images/icon.png"),
-              backgroundColor: Colors.transparent,
-            ),
-          ),
-          SizedBox(
-            width: 8,
-          ),
-          Text(
-            appName,
-          ),
-        ],
+      decoration: ShapeDecoration(
+        color: context.colorScheme.surfaceContainerHighest,
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+      padding: EdgeInsets.all(8),
+      child: Transform.translate(
+        offset: Offset(0, -1),
+        child: Image.asset('assets/images/icon.png', width: 34, height: 34),
       ),
     );
   }

@@ -2,8 +2,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/app.g.dart';
@@ -17,9 +16,7 @@ class RealTunEnable extends _$RealTunEnable with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      realTunEnable: value,
-    );
+    globalState.appState = globalState.appState.copyWith(realTunEnable: value);
   }
 }
 
@@ -30,39 +27,38 @@ class Logs extends _$Logs with AutoDisposeNotifierMixin {
     return globalState.appState.logs;
   }
 
-  addLog(Log value) {
-    state = state.copyWith()..add(value);
+  void addLog(Log value) {
+    this.value = state.copyWith()..add(value);
   }
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      logs: value,
-    );
+    globalState.appState = globalState.appState.copyWith(logs: value);
   }
 }
 
 @riverpod
 class Requests extends _$Requests with AutoDisposeNotifierMixin {
   @override
-  FixedList<Connection> build() {
+  FixedList<TrackerInfo> build() {
     return globalState.appState.requests;
   }
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      requests: value,
-    );
+    globalState.appState = globalState.appState.copyWith(requests: value);
   }
 
-  addRequest(Connection value) {
-    state = state.copyWith()..add(value);
+  void addRequest(TrackerInfo value) {
+    this.value = state.copyWith()..add(value);
   }
 }
 
 @riverpod
-class Providers extends _$Providers with AutoDisposeNotifierMixin {
+class Providers extends _$Providers with AnyNotifierMixin {
+  @override
+  List<ExternalProvider> get value => globalState.appState.providers;
+
   @override
   List<ExternalProvider> build() {
     return globalState.appState.providers;
@@ -70,16 +66,18 @@ class Providers extends _$Providers with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      providers: value,
-    );
+    globalState.appState = globalState.appState.copyWith(providers: value);
   }
 
-  setProvider(ExternalProvider? provider) {
+  void setProvider(ExternalProvider? provider) {
+    if (!ref.mounted) {
+      return;
+    }
     if (provider == null) return;
-    final index = state.indexWhere((item) => item.name == provider.name);
+    final index = value.indexWhere((item) => item.name == provider.name);
     if (index == -1) return;
-    state = List.from(state)..[index] = provider;
+    final newState = List<ExternalProvider>.from(value)..[index] = provider;
+    value = newState;
   }
 }
 
@@ -92,28 +90,25 @@ class Packages extends _$Packages with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      packages: value,
-    );
+    globalState.appState = globalState.appState.copyWith(packages: value);
   }
 }
 
 @riverpod
-class AppBrightness extends _$AppBrightness with AutoDisposeNotifierMixin {
+class SystemBrightness extends _$SystemBrightness
+    with AutoDisposeNotifierMixin {
   @override
-  Brightness? build() {
+  Brightness build() {
     return globalState.appState.brightness;
   }
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      brightness: value,
-    );
+    globalState.appState = globalState.appState.copyWith(brightness: value);
   }
 
-  setState(Brightness? value) {
-    state = value;
+  void setState(Brightness value) {
+    this.value = value;
   }
 }
 
@@ -126,17 +121,15 @@ class Traffics extends _$Traffics with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      traffics: value,
-    );
+    globalState.appState = globalState.appState.copyWith(traffics: value);
   }
 
-  addTraffic(Traffic value) {
-    state = state.copyWith()..add(value);
+  void addTraffic(Traffic value) {
+    this.value = state.copyWith()..add(value);
   }
 
-  clear() {
-    state = state.copyWith()..clear();
+  void clear() {
+    value = state.copyWith()..clear();
   }
 }
 
@@ -149,9 +142,7 @@ class TotalTraffic extends _$TotalTraffic with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      totalTraffic: value,
-    );
+    globalState.appState = globalState.appState.copyWith(totalTraffic: value);
   }
 }
 
@@ -164,17 +155,7 @@ class LocalIp extends _$LocalIp with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      localIp: value,
-    );
-  }
-
-  @override
-  set state(String? value) {
-    super.state = value;
-    globalState.appState = globalState.appState.copyWith(
-      localIp: state,
-    );
+    globalState.appState = globalState.appState.copyWith(localIp: value);
   }
 }
 
@@ -187,13 +168,7 @@ class RunTime extends _$RunTime with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      runTime: value,
-    );
-  }
-
-  bool get isStart {
-    return state != null;
+    globalState.appState = globalState.appState.copyWith(runTime: value);
   }
 }
 
@@ -206,14 +181,21 @@ class ViewSize extends _$ViewSize with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      viewSize: value,
-    );
+    globalState.appState = globalState.appState.copyWith(viewSize: value);
+  }
+}
+
+@riverpod
+class SideWidth extends _$SideWidth with AutoDisposeNotifierMixin {
+  @override
+  double build() {
+    return globalState.appState.sideWidth;
   }
 
-  ViewMode get viewMode => utils.getViewMode(state.width);
-
-  bool get isMobileView => viewMode == ViewMode.mobile;
+  @override
+  onUpdate(value) {
+    globalState.appState = globalState.appState.copyWith(sideWidth: value);
+  }
 }
 
 @riverpod
@@ -245,9 +227,7 @@ class Init extends _$Init with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      isInit: value,
-    );
+    globalState.appState = globalState.appState.copyWith(isInit: value);
   }
 }
 
@@ -261,9 +241,7 @@ class CurrentPageLabel extends _$CurrentPageLabel
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      pageLabel: value,
-    );
+    globalState.appState = globalState.appState.copyWith(pageLabel: value);
   }
 }
 
@@ -276,12 +254,10 @@ class SortNum extends _$SortNum with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      sortNum: value,
-    );
+    globalState.appState = globalState.appState.copyWith(sortNum: value);
   }
 
-  add() => state++;
+  int add() => state++;
 }
 
 @riverpod
@@ -293,12 +269,10 @@ class CheckIpNum extends _$CheckIpNum with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      checkIpNum: value,
-    );
+    globalState.appState = globalState.appState.copyWith(checkIpNum: value);
   }
 
-  add() => state++;
+  int add() => state++;
 }
 
 @riverpod
@@ -310,9 +284,20 @@ class BackBlock extends _$BackBlock with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      backBlock: value,
-    );
+    globalState.appState = globalState.appState.copyWith(backBlock: value);
+  }
+}
+
+@riverpod
+class Loading extends _$Loading with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return globalState.appState.loading;
+  }
+
+  @override
+  onUpdate(value) {
+    globalState.appState = globalState.appState.copyWith(loading: value);
   }
 }
 
@@ -325,9 +310,7 @@ class Version extends _$Version with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      version: value,
-    );
+    globalState.appState = globalState.appState.copyWith(version: value);
   }
 }
 
@@ -340,9 +323,7 @@ class Groups extends _$Groups with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      groups: value,
-    );
+    globalState.appState = globalState.appState.copyWith(groups: value);
   }
 }
 
@@ -355,34 +336,87 @@ class DelayDataSource extends _$DelayDataSource with AutoDisposeNotifierMixin {
 
   @override
   onUpdate(value) {
-    globalState.appState = globalState.appState.copyWith(
-      delayMap: value,
-    );
+    globalState.appState = globalState.appState.copyWith(delayMap: value);
   }
 
-  setDelay(Delay delay) {
+  void setDelay(Delay delay) {
     if (state[delay.url]?[delay.name] != delay.value) {
       final DelayMap newDelayMap = Map.from(state);
       if (newDelayMap[delay.url] == null) {
         newDelayMap[delay.url] = {};
       }
       newDelayMap[delay.url]![delay.name] = delay.value;
-      state = newDelayMap;
+      value = newDelayMap;
     }
   }
 }
 
 @riverpod
-class ProxiesQuery extends _$ProxiesQuery with AutoDisposeNotifierMixin {
+class SystemUiOverlayStyleState extends _$SystemUiOverlayStyleState
+    with AutoDisposeNotifierMixin {
   @override
-  String build() {
-    return globalState.appState.proxiesQuery;
+  SystemUiOverlayStyle build() {
+    return globalState.appState.systemUiOverlayStyle;
   }
 
   @override
   onUpdate(value) {
     globalState.appState = globalState.appState.copyWith(
-      proxiesQuery: value,
+      systemUiOverlayStyle: value,
     );
+  }
+}
+
+@riverpod
+class ProfileOverrideState extends _$ProfileOverrideState
+    with AutoDisposeNotifierMixin {
+  @override
+  ProfileOverrideModel? build() {
+    return globalState.appState.profileOverrideModel;
+  }
+
+  @override
+  onUpdate(value) {
+    globalState.appState = globalState.appState.copyWith(
+      profileOverrideModel: value,
+    );
+  }
+
+  void updateState(
+    ProfileOverrideModel? Function(ProfileOverrideModel? state) builder,
+  ) {
+    final value = builder(state);
+    if (value == null) {
+      return;
+    }
+    this.value = value;
+  }
+}
+
+@Riverpod(name: 'coreStatusProvider')
+class _CoreStatus extends _$CoreStatus with AutoDisposeNotifierMixin {
+  @override
+  CoreStatus build() {
+    return globalState.appState.coreStatus;
+  }
+
+  @override
+  onUpdate(value) {
+    globalState.appState = globalState.appState.copyWith(coreStatus: value);
+  }
+}
+
+@riverpod
+class QueryMap extends _$QueryMap with AutoDisposeNotifierMixin {
+  @override
+  Map<QueryTag, String> build() => globalState.appState.queryMap;
+
+  @override
+  onUpdate(value) {
+    globalState.appState = globalState.appState.copyWith(queryMap: value);
+  }
+
+  void updateQuery(QueryTag tag, String value) {
+    this.value = Map.from(globalState.appState.queryMap)..[tag] = value;
   }
 }

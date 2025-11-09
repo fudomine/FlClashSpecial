@@ -7,28 +7,17 @@ extension BuildContextExtension on BuildContext {
     return findAncestorStateOfType<CommonScaffoldState>();
   }
 
-  showNotifier(String text) {
+  void showNotifier(String text) {
     return findAncestorStateOfType<MessageManagerState>()?.message(text);
   }
 
-  showSnackBar(
-    String message, {
-    SnackBarAction? action,
-  }) {
+  void showSnackBar(String message, {SnackBarAction? action}) {
     final width = viewWidth;
     EdgeInsets margin;
     if (width < 600) {
-      margin = const EdgeInsets.only(
-        bottom: 16,
-        right: 16,
-        left: 16,
-      );
+      margin = const EdgeInsets.only(bottom: 16, right: 16, left: 16);
     } else {
-      margin = EdgeInsets.only(
-        bottom: 16,
-        left: 16,
-        right: width - 316,
-      );
+      margin = EdgeInsets.only(bottom: 16, left: 16, right: width - 316);
     }
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
@@ -70,5 +59,23 @@ extension BuildContextExtension on BuildContext {
 
     visitor(this as Element);
     return state;
+  }
+}
+
+class BackHandleInherited extends InheritedWidget {
+  final Function handleBack;
+
+  const BackHandleInherited({
+    super.key,
+    required this.handleBack,
+    required super.child,
+  });
+
+  static BackHandleInherited? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BackHandleInherited>();
+
+  @override
+  bool updateShouldNotify(BackHandleInherited oldWidget) {
+    return handleBack != oldWidget.handleBack;
   }
 }
