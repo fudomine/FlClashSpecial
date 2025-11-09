@@ -1,8 +1,7 @@
-## v1.8.87
 
-- update
+## v1.8.90
 
-- Update changelog
+- update upstream v0.8.90
 
 ## v1.8.86
 
