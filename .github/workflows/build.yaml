@@ -1,8 +1,15 @@
 name: build
 
 on:
-   release:
+  workflow_dispatch:
+    inputs:
+      build-tag:
+        description: 'Optional build tag or version (for manual builds)'
+        required: false
+        default: 'manual-latest'
+  release:
     types: [published]
+
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
 
