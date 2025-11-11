@@ -60,7 +60,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     return generateSection(
       title: appLocalizations.other,
       items: [
-        _DisclaimerItem(),
+      //  _DisclaimerItem(),
         if (enableDeveloperMode) _DeveloperItem(),
         _InfoItem(),
       ],
@@ -73,8 +73,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       items: [
         _LocaleItem(),
         _ThemeItem(),
-        _BackupItem(),
-        if (system.isDesktop) _HotkeyItem(),
+      //  _BackupItem(),
+      //  if (system.isDesktop) _HotkeyItem(),
         if (system.isWindows) _LoopbackItem(),
         if (system.isAndroid) _AccessItem(),
         _ConfigItem(),
@@ -173,6 +173,7 @@ class _ThemeItem extends StatelessWidget {
   }
 }
 
+/*
 class _BackupItem extends StatelessWidget {
   const _BackupItem();
 
@@ -206,7 +207,7 @@ class _HotkeyItem extends StatelessWidget {
     );
   }
 }
-
+*/
 class _LoopbackItem extends StatelessWidget {
   const _LoopbackItem();
 
@@ -276,7 +277,7 @@ class _SettingItem extends StatelessWidget {
     );
   }
 }
-
+/*
 class _DisclaimerItem extends StatelessWidget {
   const _DisclaimerItem();
 
@@ -295,7 +296,7 @@ class _DisclaimerItem extends StatelessWidget {
     );
   }
 }
-
+*/
 class _InfoItem extends StatelessWidget {
   const _InfoItem();
 
