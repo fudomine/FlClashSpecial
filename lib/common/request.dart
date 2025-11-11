@@ -58,7 +58,7 @@ class Request {
   }
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
-    final response = await _dio.get(
+    final response = await dio.get(
       "https://api.github.com/repos/fudomine/FlClashSpecial/releases/latest",
       options: Options(
         responseType: ResponseType.json,
