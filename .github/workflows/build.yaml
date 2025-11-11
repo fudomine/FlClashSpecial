@@ -34,9 +34,9 @@ jobs:
           #          - platform: windows
           #            os: windows-11-arm
           #            arch: arm64
-          - platform: linux
-            os: ubuntu-24.04-arm
-            arch: arm64
+          #- platform: linux
+          #  os: ubuntu-24.04-arm
+          #  arch: arm64
 
     steps:
       - name: Setup rust
