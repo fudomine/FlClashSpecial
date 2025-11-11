@@ -6,7 +6,15 @@ targets:
           build_extensions:
             '^lib/models/{{}}.dart': 'lib/models/generated/{{}}.g.dart'
             '^lib/providers/{{}}.dart': 'lib/providers/generated/{{}}.g.dart'
+        generate_for:
+          - lib/**
+          - test/**
+          - "!plugins/**"  # 🚫 忽略子模块目录
       freezed:
         options:
           build_extensions:
             '^lib/models/{{}}.dart': 'lib/models/generated/{{}}.freezed.dart'
+        generate_for:
+          - lib/**
+          - test/**
+          - "!plugins/**"  # 🚫 忽略子模块目录
