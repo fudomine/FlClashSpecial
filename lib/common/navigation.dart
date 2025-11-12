@@ -41,6 +41,7 @@ class Navigation {
         description: 'requestsDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
+      /*
       NavigationItem(
         icon: Icon(Icons.ballot),
         label: PageLabel.connections,
@@ -49,6 +50,7 @@ class Navigation {
         description: 'connectionsDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
+      */
       NavigationItem(
         icon: Icon(Icons.storage),
         label: PageLabel.resources,

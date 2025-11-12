@@ -236,7 +236,7 @@ class CrashlyticsItem extends ConsumerWidget {
     );
   }
 }
-
+/*
 class AutoCheckUpdateItem extends ConsumerWidget {
   const AutoCheckUpdateItem({super.key});
 
@@ -259,7 +259,7 @@ class AutoCheckUpdateItem extends ConsumerWidget {
     );
   }
 }
-
+*/
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
@@ -280,7 +280,7 @@ class ApplicationSettingView extends StatelessWidget {
       CloseConnectionsItem(),
       UsageItem(),
       if (system.isAndroid) CrashlyticsItem(),
-      AutoCheckUpdateItem(),
+    //  AutoCheckUpdateItem(),
     ];
     return ListView.separated(
       itemBuilder: (_, index) {
