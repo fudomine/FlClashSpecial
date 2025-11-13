@@ -40,7 +40,7 @@ class ThemeView extends StatelessWidget {
     final items = [
       _ThemeModeItem(),
       _PrimaryColorItem(),
-      _PrueBlackItem(),
+    //  _PrueBlackItem(),
       _TextScaleFactorItem(),
       const SizedBox(height: 64),
     ];
