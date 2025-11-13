@@ -54,7 +54,7 @@ class AboutView extends StatelessWidget {
       ],
     );
   }
-
+/*
   List<Widget> _buildContributorsSection() {
     const contributors = [
       Contributor(
@@ -87,7 +87,7 @@ class AboutView extends StatelessWidget {
       ],
     );
   }
-
+*/
   @override
   Widget build(BuildContext context) {
     final items = [
@@ -147,7 +147,7 @@ class AboutView extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 12),
-      ..._buildContributorsSection(),
+     // ..._buildContributorsSection(),
       ..._buildMoreSection(context),
     ];
     return Padding(

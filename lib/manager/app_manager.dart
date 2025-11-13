@@ -151,7 +151,20 @@ class AppSidebarContainer extends ConsumerWidget {
     required BuildContext context,
     required Widget child,
   }) {
-    return Material(color: context.colorScheme.surfaceContainer, child: child);
+  //add frame
+    return Container(
+      decoration: BoxDecoration(
+        border: const Border(
+          top: BorderSide(color: Colors.black26, width: 1),
+          left: BorderSide(color: Colors.black26, width: 1),
+          right: BorderSide(color: Colors.black26, width: 1),
+          bottom: BorderSide(color: Colors.black26, width: 1),
+        ),
+        color: context.colorScheme.surfaceContainer,
+      ),
+      child: child,
+    );
+    //return Material(color: context.colorScheme.surfaceContainer, child: child);
     // if (!system.isMacOS) {
     //   return Material(
     //     color: context.colorScheme.surfaceContainer,
