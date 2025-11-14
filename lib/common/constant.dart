@@ -99,9 +99,7 @@ const defaultPrimaryColors = [
   0xFF795548,
   defaultPrimaryColor,
   0xFFFFFF00,
-  0XFFBBC9CC,
   0XFFABD397,
-  0XFFD8C0C3,
   0XFF665390,
 ];
 
