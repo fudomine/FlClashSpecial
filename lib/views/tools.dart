@@ -71,14 +71,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     return generateSection(
       title: appLocalizations.settings,
       items: [
+        _ConfigItem(),
+        _SettingItem(),
         _LocaleItem(),
         _ThemeItem(),
       //  _BackupItem(),
       //  if (system.isDesktop) _HotkeyItem(),
         if (system.isWindows) _LoopbackItem(),
         if (system.isAndroid) _AccessItem(),
-        _ConfigItem(),
-        _SettingItem(),
       ],
     );
   }
