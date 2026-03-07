@@ -1,3 +1,20 @@
+## v1.8.92
+
+- Add sqlite store
+
+- Optimize android quick action
+
+- Optimize backup and restore
+
+- Optimize more details
+
+- Fix windows some issues
+
+- Optimize overwrite handle
+
+- Optimize access control page
+
+- Optimize some details
 
 ## v1.8.90
 

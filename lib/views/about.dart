@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,17 +26,11 @@ class AboutView extends StatelessWidget {
   const AboutView({super.key});
 
   Future<void> _checkUpdate(BuildContext context) async {
-    final commonScaffoldState = context.commonScaffoldState;
-    if (commonScaffoldState?.mounted != true) return;
-    final data = await globalState.appController.safeRun<Map<String, dynamic>?>(
+    final data = await appController.safeRun<Map<String, dynamic>?>(
       request.checkForUpdate,
       title: appLocalizations.checkUpdate,
-      needLoading: true,
     );
-    globalState.appController.checkUpdateResultHandle(
-      data: data,
-      handleError: true,
-    );
+    appController.checkUpdateResultHandle(data: data, isUser: true);
   }
 
   List<Widget> _buildMoreSection(BuildContext context) {
@@ -58,12 +54,12 @@ class AboutView extends StatelessWidget {
   List<Widget> _buildContributorsSection() {
     const contributors = [
       Contributor(
-        avatar: 'assets/images/avatars/june2.jpg',
+        avatar: 'assets/images/avatar/june2.jpg',
         name: 'June2',
         link: 'https://t.me/Jibadong',
       ),
       Contributor(
-        avatar: 'assets/images/avatars/arue.jpg',
+        avatar: 'assets/images/avatar/arue.jpg',
         name: 'Arue',
         link: 'https://t.me/xrcm6868',
       ),
@@ -128,9 +124,7 @@ class AboutView extends StatelessWidget {
                   onEnterDeveloperMode: () {
                     ref
                         .read(appSettingProvider.notifier)
-                        .updateState(
-                          (state) => state.copyWith(developerMode: true),
-                        );
+                        .update((state) => state.copyWith(developerMode: true));
                     context.showNotifier(
                       appLocalizations.developerModeEnableTip,
                     );
@@ -150,9 +144,12 @@ class AboutView extends StatelessWidget {
      // ..._buildContributorsSection(),
       ..._buildMoreSection(context),
     ];
-    return Padding(
-      padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-      child: generateListView(items),
+    return BaseScaffold(
+      title: appLocalizations.about,
+      body: Padding(
+        padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
+        child: generateListView(items),
+      ),
     );
   }
 }

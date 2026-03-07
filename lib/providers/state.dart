@@ -9,47 +9,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'app.dart';
 import 'config.dart';
+import 'database.dart';
 
 part 'generated/state.g.dart';
-
-@riverpod
-Config configState(Ref ref) {
-  final themeProps = ref.watch(themeSettingProvider);
-  final patchClashConfig = ref.watch(patchClashConfigProvider);
-  final appSetting = ref.watch(appSettingProvider);
-  final profiles = ref.watch(profilesProvider);
-  final currentProfileId = ref.watch(currentProfileIdProvider);
-  final overrideDns = ref.watch(overrideDnsProvider);
-  final networkProps = ref.watch(networkSettingProvider);
-  final vpnProps = ref.watch(vpnSettingProvider);
-  final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
-  final scriptProps = ref.watch(scriptStateProvider);
-  final hotKeyActions = ref.watch(hotKeyActionsProvider);
-  final dav = ref.watch(appDAVSettingProvider);
-  final windowProps = ref.watch(windowSettingProvider);
-  return Config(
-    dav: dav,
-    windowProps: windowProps,
-    hotKeyActions: hotKeyActions,
-    scriptProps: scriptProps,
-    proxiesStyle: proxiesStyle,
-    vpnProps: vpnProps,
-    networkProps: networkProps,
-    overrideDns: overrideDns,
-    currentProfileId: currentProfileId,
-    profiles: profiles,
-    appSetting: appSetting,
-    themeProps: themeProps,
-    patchClashConfig: patchClashConfig,
-  );
-}
 
 @riverpod
 GroupsState currentGroupsState(Ref ref) {
   final mode = ref.watch(
     patchClashConfigProvider.select((state) => state.mode),
   );
-  final groups = ref.watch(groupsProvider);
+  final groups = ref.watch(
+    groupsProvider.select(
+      (state) => state.map((item) {
+        return item.copyWith(
+          now: '',
+          all: item.all.map((proxy) => proxy.copyWith(now: '')).toList(),
+        );
+      }),
+    ),
+  );
   return GroupsState(
     value: switch (mode) {
       Mode.direct => [],
@@ -124,7 +102,7 @@ ProxyState proxyState(Ref ref) {
   final isStart = ref.watch(runTimeProvider.select((state) => state != null));
   final vm2 = ref.watch(
     networkSettingProvider.select(
-      (state) => VM2(a: state.systemProxy, b: state.bypassDomain),
+      (state) => VM2(state.systemProxy, state.bypassDomain),
     ),
   );
   final mixedPort = ref.watch(
@@ -141,26 +119,47 @@ ProxyState proxyState(Ref ref) {
 @riverpod
 TrayState trayState(Ref ref) {
   final isStart = ref.watch(runTimeProvider.select((state) => state != null));
-  final networkProps = ref.watch(networkSettingProvider);
-  final clashConfig = ref.watch(patchClashConfigProvider);
-  final appSetting = ref.watch(appSettingProvider);
+  final systemProxy = ref.watch(
+    networkSettingProvider.select((state) => state.systemProxy),
+  );
+  final clashConfigVm3 = ref.watch(
+    patchClashConfigProvider.select(
+      (state) => VM3(state.mode, state.mixedPort, state.tun.enable),
+    ),
+  );
+  final appSettingVm3 = ref.watch(
+    appSettingProvider.select(
+      (state) => VM3(state.autoLaunch, state.locale, state.showTrayTitle),
+    ),
+  );
   final groups = ref.watch(currentGroupsStateProvider).value;
   final brightness = ref.watch(systemBrightnessProvider);
-
   final selectedMap = ref.watch(selectedMapProvider);
 
   return TrayState(
-    mode: clashConfig.mode,
-    port: clashConfig.mixedPort,
-    autoLaunch: appSetting.autoLaunch,
-    systemProxy: networkProps.systemProxy,
-    tunEnable: clashConfig.tun.enable,
+    mode: clashConfigVm3.a,
+    port: clashConfigVm3.b,
+    autoLaunch: appSettingVm3.a,
+    systemProxy: systemProxy,
+    tunEnable: clashConfigVm3.c,
     isStart: isStart,
-    locale: appSetting.locale,
+    locale: appSettingVm3.b,
     brightness: brightness,
     groups: groups,
     selectedMap: selectedMap,
+    showTrayTitle: appSettingVm3.c,
   );
+}
+
+@riverpod
+TrayTitleState trayTitleState(Ref ref) {
+  final showTrayTitle = ref.watch(
+    appSettingProvider.select((state) => state.showTrayTitle),
+  );
+  final traffic = ref.watch(
+    trafficsProvider.select((state) => state.list.safeLast(Traffic())),
+  );
+  return TrayTitleState(showTrayTitle: showTrayTitle, traffic: traffic);
 }
 
 @riverpod
@@ -169,7 +168,6 @@ VpnState vpnState(Ref ref) {
   final stack = ref.watch(
     patchClashConfigProvider.select((state) => state.tun.stack),
   );
-
   return VpnState(stack: stack, vpnProps: vpnProps);
 }
 
@@ -228,22 +226,13 @@ ProxiesActionsState proxiesActionsState(Ref ref) {
 }
 
 @riverpod
-StartButtonSelectorState startButtonSelectorState(Ref ref) {
-  final isInit = ref.watch(initProvider);
-  final hasProfile = ref.watch(
-    profilesProvider.select((state) => state.isNotEmpty),
-  );
-  return StartButtonSelectorState(isInit: isInit, hasProfile: hasProfile);
-}
-
-@riverpod
-ProfilesSelectorState profilesSelectorState(Ref ref) {
+ProfilesState profilesState(Ref ref) {
   final currentProfileId = ref.watch(currentProfileIdProvider);
   final profiles = ref.watch(profilesProvider);
   final columns = ref.watch(
     contentWidthProvider.select((state) => utils.getProfilesColumns(state)),
   );
-  return ProfilesSelectorState(
+  return ProfilesState(
     profiles: profiles,
     currentProfileId: currentProfileId,
     columns: columns,
@@ -267,7 +256,7 @@ GroupsState filterGroupsState(Ref ref, String query) {
       })
       .where((group) => group.all.isNotEmpty)
       .toList();
-  return GroupsState(value: groups);
+  return currentGroups.copyWith(value: groups);
 }
 
 @riverpod
@@ -317,8 +306,8 @@ VM2<List<String>, String?> proxiesTabControllerState(Ref ref) {
   return ref.watch(
     proxiesTabStateProvider.select(
       (state) => VM2(
-        a: state.groups.map((group) => group.name).toList(),
-        b: state.currentGroupName,
+        state.groups.map((group) => group.name).toList(),
+        state.currentGroupName,
       ),
     ),
   );
@@ -358,12 +347,12 @@ ProxyGroupSelectorState proxyGroupSelectorState(
 @riverpod
 PackageListSelectorState packageListSelectorState(Ref ref) {
   final packages = ref.watch(packagesProvider);
-  final accessControl = ref.watch(
-    vpnSettingProvider.select((state) => state.accessControl),
+  final accessControlProps = ref.watch(
+    vpnSettingProvider.select((state) => state.accessControlProps),
   );
   return PackageListSelectorState(
     packages: packages,
-    accessControl: accessControl,
+    accessControlProps: accessControlProps,
   );
 }
 
@@ -405,18 +394,19 @@ bool isCurrentPage(
 }
 
 @riverpod
-String getRealTestUrl(Ref ref, [String? testUrl]) {
+String realTestUrl(Ref ref, [String? testUrl]) {
   final currentTestUrl = ref.watch(appSettingProvider).testUrl;
-  return testUrl.getSafeValue(currentTestUrl);
+  return testUrl.takeFirstValid([currentTestUrl]);
 }
 
 @riverpod
 int? getDelay(Ref ref, {required String proxyName, String? testUrl}) {
-  final currentTestUrl = ref.watch(getRealTestUrlProvider(testUrl));
+  final currentTestUrl = ref.watch(realTestUrlProvider(testUrl));
   final proxyState = ref.watch(realSelectedProxyStateProvider(proxyName));
   final delay = ref.watch(
     delayDataSourceProvider.select((state) {
-      final delayMap = state[proxyState.testUrl.getSafeValue(currentTestUrl)];
+      final delayMap =
+          state[proxyState.testUrl.takeFirstValid([currentTestUrl])];
       return delayMap?[proxyState.proxyName];
     }),
   );
@@ -425,7 +415,7 @@ int? getDelay(Ref ref, {required String proxyName, String? testUrl}) {
 }
 
 @riverpod
-SelectedMap selectedMap(Ref ref) {
+Map<String, String> selectedMap(Ref ref) {
   final selectedMap = ref.watch(
     currentProfileProvider.select((state) => state?.selectedMap ?? {}),
   );
@@ -510,25 +500,8 @@ String getProxyDesc(Ref ref, Proxy proxy) {
 }
 
 @riverpod
-OverrideData? getProfileOverrideData(Ref ref, String profileId) {
-  return ref.watch(
-    profilesProvider.select(
-      (state) => state.getProfile(profileId)?.overrideData,
-    ),
-  );
-}
-
-@riverpod
-VM2? layoutChange(Ref ref) {
-  final viewWidth = ref.watch(viewWidthProvider);
-  final textScale = ref.watch(
-    themeSettingProvider.select((state) => state.textScale),
-  );
-  return VM2(a: viewWidth, b: textScale);
-}
-
-@riverpod
-VM2<int, bool> checkIp(Ref ref) {
+VM3<bool, int, bool> checkIp(Ref ref) {
+  final isInit = ref.watch(initProvider);
   final checkIpNum = ref.watch(checkIpNumProvider);
   final containsDetection = ref.watch(
     dashboardStateProvider.select(
@@ -536,7 +509,7 @@ VM2<int, bool> checkIp(Ref ref) {
           state.dashboardWidgets.contains(DashboardWidget.networkDetection),
     ),
   );
-  return VM2(a: checkIpNum, b: containsDetection);
+  return VM3(isInit, checkIpNum, containsDetection);
 }
 
 @riverpod
@@ -548,7 +521,7 @@ ColorScheme genColorScheme(
 }) {
   final vm2 = ref.watch(
     themeSettingProvider.select(
-      (state) => VM2(a: state.primaryColor, b: state.schemeVariant),
+      (state) => VM2(state.primaryColor, state.schemeVariant),
     ),
   );
   if (color == null && (ignoreConfig == true || vm2.a == null)) {
@@ -573,19 +546,9 @@ ColorScheme genColorScheme(
 }
 
 @riverpod
-VM4<String?, String?, Dns?, bool> needSetup(Ref ref) {
+SetupState? currentSetupState(Ref ref) {
   final profileId = ref.watch(currentProfileIdProvider);
-  final content = ref.watch(
-    scriptStateProvider.select((state) => state.currentScript?.content),
-  );
-  final overrideDns = ref.watch(overrideDnsProvider);
-  final dns = overrideDns == true
-      ? ref.watch(patchClashConfigProvider.select((state) => state.dns))
-      : null;
-  final appendSystemDns = ref.watch(
-    networkSettingProvider.select((state) => state.appendSystemDns),
-  );
-  return VM4(profileId, content, dns, appendSystemDns);
+  return ref.watch(setupStateProvider(profileId)).value;
 }
 
 @riverpod
@@ -608,7 +571,7 @@ VM2<bool, bool> autoSetSystemDnsState(Ref ref) {
   final autoSetSystemDns = ref.watch(
     networkSettingProvider.select((state) => state.autoSetSystemDns),
   );
-  return VM2(a: isStart ? realTunEnable : false, b: autoSetSystemDns);
+  return VM2(isStart ? realTunEnable : false, autoSetSystemDns);
 }
 
 @riverpod
@@ -620,32 +583,126 @@ VM3<bool, int, ProxiesSortType> needUpdateGroups(Ref ref) {
   final sortType = ref.watch(
     proxiesStyleSettingProvider.select((state) => state.sortType),
   );
-  return VM3(a: isProxies, b: sortNum, c: sortType);
+  return VM3(isProxies, sortNum, sortType);
 }
 
 @riverpod
-AndroidState androidState(Ref ref) {
-  final currentProfileName = ref.watch(
-    currentProfileProvider.select((state) => state?.label ?? ''),
-  );
-  final onlyStatisticsProxy = ref.watch(
-    appSettingProvider.select((state) => state.onlyStatisticsProxy),
-  );
+SharedState sharedState(Ref ref) {
   ref.watch((appSettingProvider).select((state) => state.locale));
-  final crashlytics = ref.watch(
-    (appSettingProvider).select((state) => state.crashlytics),
+  final currentProfileVM2 = ref.watch(
+    currentProfileProvider.select(
+      (state) => VM2(state?.label ?? '', state?.selectedMap ?? {}),
+    ),
   );
-  return AndroidState(
+  final appSettingVM3 = ref.watch(
+    appSettingProvider.select(
+      (state) =>
+          VM3(state.onlyStatisticsProxy, state.crashlytics, state.testUrl),
+    ),
+  );
+  final bypassDomain = ref.watch(
+    networkSettingProvider.select((state) => state.bypassDomain),
+  );
+  final clashConfigVM2 = ref.watch(
+    patchClashConfigProvider.select(
+      (state) => VM2(state.tun.stack.name, state.mixedPort),
+    ),
+  );
+  final vpnSetting = ref.watch(vpnSettingProvider);
+  final currentProfileName = currentProfileVM2.a;
+  final selectedMap = currentProfileVM2.b;
+  final onlyStatisticsProxy = appSettingVM3.a;
+  final crashlytics = appSettingVM3.b;
+  final testUrl = appSettingVM3.c;
+  final stack = clashConfigVM2.a;
+  final port = clashConfigVM2.b;
+  return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
     stopText: appLocalizations.stop,
     crashlytics: crashlytics,
+    stopTip: appLocalizations.stopVpn,
+    startTip: appLocalizations.startVpn,
+    setupParams: SetupParams(selectedMap: selectedMap, testUrl: testUrl),
+    vpnOptions: VpnOptions(
+      enable: vpnSetting.enable,
+      stack: stack,
+      systemProxy: vpnSetting.systemProxy,
+      port: port,
+      ipv6: vpnSetting.ipv6,
+      dnsHijacking: vpnSetting.dnsHijacking,
+      accessControlProps: vpnSetting.accessControlProps,
+      allowBypass: vpnSetting.allowBypass,
+      bypassDomain: bypassDomain,
+    ),
   );
 }
 
 @riverpod
-class Query extends _$Query {
+double overlayTopOffset(Ref ref) {
+  final isMobileView = ref.watch(isMobileViewProvider);
+  final version = ref.watch(versionProvider);
+  ref.watch(viewSizeProvider);
+  double top = kHeaderHeight;
+  if ((version <= 10 || !isMobileView) && system.isMacOS || !system.isDesktop) {
+    top = 0;
+  }
+  return kToolbarHeight + top;
+}
+
+@riverpod
+Profile? profile(Ref ref, int? profileId) {
+  return ref.watch(
+    profilesProvider.select((state) => state.getProfile(profileId)),
+  );
+}
+
+@riverpod
+OverwriteType overwriteType(Ref ref, int? profileId) {
+  return ref.watch(
+    profileProvider(
+      profileId,
+    ).select((state) => state?.overwriteType ?? OverwriteType.standard),
+  );
+}
+
+@riverpod
+Future<Script?> script(Ref ref, int? scriptId) async {
+  final script = await ref.watch(
+    (scriptsProvider.future.select((state) async {
+      final scripts = await state;
+      return scripts.get(scriptId);
+    })),
+  );
+  return script;
+}
+
+@riverpod
+Future<SetupState> setupState(Ref ref, int? profileId) async {
+  final profile = ref.watch(profileProvider(profileId));
+  final scriptId = profile?.scriptId;
+  final profileLastUpdateDate = profile?.lastUpdateDate?.millisecondsSinceEpoch;
+  final overwriteType = profile?.overwriteType ?? OverwriteType.standard;
+  final dns = ref.watch(patchClashConfigProvider.select((state) => state.dns));
+  final script = await ref.watch(scriptProvider(scriptId).future);
+  final overrideDns = ref.watch(overrideDnsProvider);
+  final List<Rule> addedRules = profileId != null
+      ? await ref.watch(addedRuleStreamProvider(profileId).future)
+      : [];
+  return SetupState(
+    profileId: profileId,
+    profileLastUpdateDate: profileLastUpdateDate,
+    overwriteType: overwriteType,
+    addedRules: addedRules,
+    script: script,
+    overrideDns: overrideDns,
+    dns: dns,
+  );
+}
+
+@riverpod
+class AccessControlState extends _$AccessControlState
+    with AutoDisposeNotifierMixin {
   @override
-  String build(QueryTag id) =>
-      ref.watch(queryMapProvider.select((state) => state[id] ?? ''));
+  AccessControlProps build() => AccessControlProps();
 }

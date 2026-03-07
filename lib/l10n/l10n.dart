@@ -999,26 +999,6 @@ class AppLocalizations {
     return Intl.message('tip', name: 'tip', desc: '', args: []);
   }
 
-  /// `Backup and Recovery`
-  String get backupAndRecovery {
-    return Intl.message(
-      'Backup and Recovery',
-      name: 'backupAndRecovery',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sync data via WebDAV or file`
-  String get backupAndRecoveryDesc {
-    return Intl.message(
-      'Sync data via WebDAV or file',
-      name: 'backupAndRecoveryDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Account`
   String get account {
     return Intl.message('Account', name: 'account', desc: '', args: []);
@@ -1027,41 +1007,6 @@ class AppLocalizations {
   /// `Backup`
   String get backup {
     return Intl.message('Backup', name: 'backup', desc: '', args: []);
-  }
-
-  /// `Recovery`
-  String get recovery {
-    return Intl.message('Recovery', name: 'recovery', desc: '', args: []);
-  }
-
-  /// `Only recovery profiles`
-  String get recoveryProfiles {
-    return Intl.message(
-      'Only recovery profiles',
-      name: 'recoveryProfiles',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery all data`
-  String get recoveryAll {
-    return Intl.message(
-      'Recovery all data',
-      name: 'recoveryAll',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery success`
-  String get recoverySuccess {
-    return Intl.message(
-      'Recovery success',
-      name: 'recoverySuccess',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Backup success`
@@ -1689,31 +1634,11 @@ class AppLocalizations {
     );
   }
 
-  /// `Recovery data from WebDAV`
-  String get remoteRecoveryDesc {
-    return Intl.message(
-      'Recovery data from WebDAV',
-      name: 'remoteRecoveryDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Backup local data to local`
   String get localBackupDesc {
     return Intl.message(
       'Backup local data to local',
       name: 'localBackupDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery data from file`
-  String get localRecoveryDesc {
-    return Intl.message(
-      'Recovery data from file',
-      name: 'localRecoveryDesc',
       desc: '',
       args: [],
     );
@@ -2619,6 +2544,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Advanced configuration`
+  String get advancedConfig {
+    return Intl.message(
+      'Advanced configuration',
+      name: 'advancedConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provide diverse configuration options`
+  String get advancedConfigDesc {
+    return Intl.message(
+      'Provide diverse configuration options',
+      name: 'advancedConfigDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count} items have been selected`
   String selectedCountTitle(Object count) {
     return Intl.message(
@@ -2914,31 +2859,31 @@ class AppLocalizations {
     return Intl.message('Contact me', name: 'contactMe', desc: '', args: []);
   }
 
-  /// `Recovery strategy`
-  String get recoveryStrategy {
+  /// `Restore strategy`
+  String get restoreStrategy {
     return Intl.message(
-      'Recovery strategy',
-      name: 'recoveryStrategy',
+      'Restore strategy',
+      name: 'restoreStrategy',
       desc: '',
       args: [],
     );
   }
 
   /// `Override`
-  String get recoveryStrategy_override {
+  String get restoreStrategy_override {
     return Intl.message(
       'Override',
-      name: 'recoveryStrategy_override',
+      name: 'restoreStrategy_override',
       desc: '',
       args: [],
     );
   }
 
   /// `Compatible`
-  String get recoveryStrategy_compatible {
+  String get restoreStrategy_compatible {
     return Intl.message(
       'Compatible',
-      name: 'recoveryStrategy_compatible',
+      name: 'restoreStrategy_compatible',
       desc: '',
       args: [],
     );
@@ -3014,10 +2959,10 @@ class AppLocalizations {
     );
   }
 
-  /// `No {label} at the moment`
+  /// `No {label} yet`
   String nullTip(Object label) {
     return Intl.message(
-      'No $label at the moment',
+      'No $label yet',
       name: 'nullTip',
       desc: '',
       args: [label],
@@ -3377,6 +3322,431 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Edit rule`
+  String get editRule {
+    return Intl.message('Edit rule', name: 'editRule', desc: '', args: []);
+  }
+
+  /// `Override mode`
+  String get overrideMode {
+    return Intl.message(
+      'Override mode',
+      name: 'overrideMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Standard mode, override basic configuration, provide simple rule addition capability`
+  String get standardModeDesc {
+    return Intl.message(
+      'Standard mode, override basic configuration, provide simple rule addition capability',
+      name: 'standardModeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Script mode, use external extension scripts, provide one-click override configuration capability`
+  String get scriptModeDesc {
+    return Intl.message(
+      'Script mode, use external extension scripts, provide one-click override configuration capability',
+      name: 'scriptModeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added rules`
+  String get addedRules {
+    return Intl.message('Added rules', name: 'addedRules', desc: '', args: []);
+  }
+
+  /// `Control global added rules`
+  String get controlGlobalAddedRules {
+    return Intl.message(
+      'Control global added rules',
+      name: 'controlGlobalAddedRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override script`
+  String get overrideScript {
+    return Intl.message(
+      'Override script',
+      name: 'overrideScript',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go to configure script`
+  String get goToConfigureScript {
+    return Intl.message(
+      'Go to configure script',
+      name: 'goToConfigureScript',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit global rules`
+  String get editGlobalRules {
+    return Intl.message(
+      'Edit global rules',
+      name: 'editGlobalRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `External fetch`
+  String get externalFetch {
+    return Intl.message(
+      'External fetch',
+      name: 'externalFetch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to force crash the core?`
+  String get confirmForceCrashCore {
+    return Intl.message(
+      'Are you sure you want to force crash the core?',
+      name: 'confirmForceCrashCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to clear all data?`
+  String get confirmClearAllData {
+    return Intl.message(
+      'Are you sure you want to clear all data?',
+      name: 'confirmClearAllData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading...`
+  String get loading {
+    return Intl.message('Loading...', name: 'loading', desc: '', args: []);
+  }
+
+  /// `Load test`
+  String get loadTest {
+    return Intl.message('Load test', name: 'loadTest', desc: '', args: []);
+  }
+
+  /// `{count, plural, =1{1 year ago} other{{count} years ago}}`
+  String yearsAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '1 year ago',
+      other: '$count years ago',
+      name: 'yearsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 month ago} other{{count} months ago}}`
+  String monthsAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '1 month ago',
+      other: '$count months ago',
+      name: 'monthsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 day ago} other{{count} days ago}}`
+  String daysAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '1 day ago',
+      other: '$count days ago',
+      name: 'daysAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 hour ago} other{{count} hours ago}}`
+  String hoursAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '1 hour ago',
+      other: '$count hours ago',
+      name: 'hoursAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 minute ago} other{{count} minutes ago}}`
+  String minutesAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '1 minute ago',
+      other: '$count minutes ago',
+      name: 'minutesAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Just now`
+  String get justNow {
+    return Intl.message('Just now', name: 'justNow', desc: '', args: []);
+  }
+
+  /// `Don't remind again`
+  String get noLongerRemind {
+    return Intl.message(
+      'Don\'t remind again',
+      name: 'noLongerRemind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access Control Settings`
+  String get accessControlSettings {
+    return Intl.message(
+      'Access Control Settings',
+      name: 'accessControlSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn On`
+  String get turnOn {
+    return Intl.message('Turn On', name: 'turnOn', desc: '', args: []);
+  }
+
+  /// `Turn Off`
+  String get turnOff {
+    return Intl.message('Turn Off', name: 'turnOff', desc: '', args: []);
+  }
+
+  /// `Core configuration change detected`
+  String get coreConfigChangeDetected {
+    return Intl.message(
+      'Core configuration change detected',
+      name: 'coreConfigChangeDetected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reload`
+  String get reload {
+    return Intl.message('Reload', name: 'reload', desc: '', args: []);
+  }
+
+  /// `VPN configuration change detected`
+  String get vpnConfigChangeDetected {
+    return Intl.message(
+      'VPN configuration change detected',
+      name: 'vpnConfigChangeDetected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart`
+  String get restart {
+    return Intl.message('Restart', name: 'restart', desc: '', args: []);
+  }
+
+  /// `Speed statistics`
+  String get speedStatistics {
+    return Intl.message(
+      'Speed statistics',
+      name: 'speedStatistics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The current page has changes. Are you sure you want to reset?`
+  String get resetPageChangesTip {
+    return Intl.message(
+      'The current page has changes. Are you sure you want to reset?',
+      name: 'resetPageChangesTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom`
+  String get overwriteTypeCustom {
+    return Intl.message(
+      'Custom',
+      name: 'overwriteTypeCustom',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom mode, fully customize proxy groups and rules`
+  String get overwriteTypeCustomDesc {
+    return Intl.message(
+      'Custom mode, fully customize proxy groups and rules',
+      name: 'overwriteTypeCustomDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown network error`
+  String get unknownNetworkError {
+    return Intl.message(
+      'Unknown network error',
+      name: 'unknownNetworkError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network request exception, please try again later.`
+  String get networkRequestException {
+    return Intl.message(
+      'Network request exception, please try again later.',
+      name: 'networkRequestException',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery exception`
+  String get restoreException {
+    return Intl.message(
+      'Recovery exception',
+      name: 'restoreException',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network exception, please check your connection and try again`
+  String get networkException {
+    return Intl.message(
+      'Network exception, please check your connection and try again',
+      name: 'networkException',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid backup file`
+  String get invalidBackupFile {
+    return Intl.message(
+      'Invalid backup file',
+      name: 'invalidBackupFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prune cache`
+  String get pruneCache {
+    return Intl.message('Prune cache', name: 'pruneCache', desc: '', args: []);
+  }
+
+  /// `Backup and Restore`
+  String get backupAndRestore {
+    return Intl.message(
+      'Backup and Restore',
+      name: 'backupAndRestore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync data via WebDAV or files`
+  String get backupAndRestoreDesc {
+    return Intl.message(
+      'Sync data via WebDAV or files',
+      name: 'backupAndRestoreDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore`
+  String get restore {
+    return Intl.message('Restore', name: 'restore', desc: '', args: []);
+  }
+
+  /// `Restore success`
+  String get restoreSuccess {
+    return Intl.message(
+      'Restore success',
+      name: 'restoreSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore data via WebDAV`
+  String get restoreFromWebDAVDesc {
+    return Intl.message(
+      'Restore data via WebDAV',
+      name: 'restoreFromWebDAVDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore data via file`
+  String get restoreFromFileDesc {
+    return Intl.message(
+      'Restore data via file',
+      name: 'restoreFromFileDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore configuration files only`
+  String get restoreOnlyConfig {
+    return Intl.message(
+      'Restore configuration files only',
+      name: 'restoreOnlyConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore all data`
+  String get restoreAllData {
+    return Intl.message(
+      'Restore all data',
+      name: 'restoreAllData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Profile`
+  String get addProfile {
+    return Intl.message('Add Profile', name: 'addProfile', desc: '', args: []);
+  }
+
+  /// `Delay Test`
+  String get delayTest {
+    return Intl.message('Delay Test', name: 'delayTest', desc: '', args: []);
   }
 }
 

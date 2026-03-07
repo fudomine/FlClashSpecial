@@ -21,7 +21,7 @@ class CloseConnectionsItem extends ConsumerWidget {
         onChanged: (value) async {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(closeConnections: value));
+              .update((state) => state.copyWith(closeConnections: value));
         },
       ),
     );
@@ -44,9 +44,7 @@ class UsageItem extends ConsumerWidget {
         onChanged: (bool value) async {
           ref
               .read(appSettingProvider.notifier)
-              .updateState(
-                (state) => state.copyWith(onlyStatisticsProxy: value),
-              );
+              .update((state) => state.copyWith(onlyStatisticsProxy: value));
         },
       ),
     );
@@ -69,7 +67,7 @@ class MinimizeItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(minimizeOnExit: value));
+              .update((state) => state.copyWith(minimizeOnExit: value));
         },
       ),
     );
@@ -92,7 +90,7 @@ class AutoLaunchItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(autoLaunch: value));
+              .update((state) => state.copyWith(autoLaunch: value));
         },
       ),
     );
@@ -115,7 +113,7 @@ class SilentLaunchItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(silentLaunch: value));
+              .update((state) => state.copyWith(silentLaunch: value));
         },
       ),
     );
@@ -138,7 +136,7 @@ class AutoRunItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(autoRun: value));
+              .update((state) => state.copyWith(autoRun: value));
         },
       ),
     );
@@ -161,7 +159,7 @@ class HiddenItem extends ConsumerWidget {
         onChanged: (value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(hidden: value));
+              .update((state) => state.copyWith(hidden: value));
         },
       ),
     );
@@ -184,7 +182,7 @@ class AnimateTabItem extends ConsumerWidget {
         onChanged: (value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(isAnimateToPage: value));
+              .update((state) => state.copyWith(isAnimateToPage: value));
         },
       ),
     );
@@ -207,7 +205,7 @@ class OpenLogsItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(openLogs: value));
+              .update((state) => state.copyWith(openLogs: value));
         },
       ),
     );
@@ -230,7 +228,7 @@ class CrashlyticsItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(crashlytics: value));
+              .update((state) => state.copyWith(crashlytics: value));
         },
       ),
     );
@@ -253,7 +251,7 @@ class AutoCheckUpdateItem extends ConsumerWidget {
         onChanged: (bool value) {
           ref
               .read(appSettingProvider.notifier)
-              .updateState((state) => state.copyWith(autoCheckUpdate: value));
+              .update((state) => state.copyWith(autoCheckUpdate: value));
         },
       ),
     );
@@ -282,15 +280,18 @@ class ApplicationSettingView extends StatelessWidget {
       if (system.isAndroid) CrashlyticsItem(),
     //  AutoCheckUpdateItem(),
     ];
-    return ListView.separated(
-      itemBuilder: (_, index) {
-        final item = items[index];
-        return item;
-      },
-      separatorBuilder: (_, _) {
-        return const Divider(height: 0);
-      },
-      itemCount: items.length,
+    return BaseScaffold(
+      title: appLocalizations.application,
+      body: ListView.separated(
+        itemBuilder: (_, index) {
+          final item = items[index];
+          return item;
+        },
+        separatorBuilder: (_, _) {
+          return const Divider(height: 0);
+        },
+        itemCount: items.length,
+      ),
     );
   }
 }

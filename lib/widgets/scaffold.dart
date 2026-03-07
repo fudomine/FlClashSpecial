@@ -1,12 +1,12 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/pop_scope.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/rendering.dart';
 
 import 'chip.dart';
+import 'inherited.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -18,12 +18,14 @@ class CommonScaffold extends StatefulWidget {
   final Widget body;
   final Color? backgroundColor;
   final String? title;
+  final bool isLoading;
   final List<Widget>? actions;
   final bool? centerTitle;
   final Widget? floatingActionButton;
   final AppBarEditState? editState;
   final AppBarSearchState? searchState;
   final OnKeywordsUpdateCallback? onKeywordsUpdate;
+  final bool? resizeToAvoidBottomInset;
 
   const CommonScaffold({
     super.key,
@@ -34,9 +36,11 @@ class CommonScaffold extends StatefulWidget {
     this.actions,
     this.centerTitle,
     this.editState,
+    this.isLoading = false,
     this.searchState,
     this.floatingActionButton,
     this.onKeywordsUpdate,
+    this.resizeToAvoidBottomInset,
   });
 
   @override
@@ -45,7 +49,8 @@ class CommonScaffold extends StatefulWidget {
 
 class CommonScaffoldState extends State<CommonScaffold> {
   late final ValueNotifier<AppBarState> _appBarState;
-  final ValueNotifier<Widget?> _floatingActionButton = ValueNotifier(null);
+  final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _isFabExtendedNotifier = ValueNotifier(true);
   final ValueNotifier<List<String>> _keywordsNotifier = ValueNotifier([]);
   final _textController = TextEditingController();
 
@@ -67,6 +72,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     _appBarState = ValueNotifier(
       AppBarState(editState: widget.editState, searchState: widget.searchState),
     );
+    _loadingNotifier.value = widget.isLoading;
   }
 
   Future<void> _updateSearchState(AppBarSearchStateBuilder builder) async {
@@ -75,10 +81,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
     );
   }
 
-  set floatingActionButton(Widget? floatingActionButton) {
-    if (_floatingActionButton.value != floatingActionButton) {
-      _floatingActionButton.value = floatingActionButton;
-    }
+  void handleToSearch() {
+    _updateSearchState((state) => state?.copyWith(query: ''));
   }
 
   Widget _buildSearchingAppBarTheme(Widget child) {
@@ -116,6 +120,9 @@ class CommonScaffoldState extends State<CommonScaffold> {
         searchState: widget.searchState,
       );
     }
+    if (oldWidget.isLoading != widget.isLoading) {
+      _loadingNotifier.value = widget.isLoading;
+    }
   }
 
   void _handleClearInput() {
@@ -133,7 +140,10 @@ class CommonScaffoldState extends State<CommonScaffold> {
     _updateSearchState((state) => state?.copyWith(query: null));
   }
 
-  void _handleExitSearching() {
+  void handleExitSearching() {
+    if (!_isSearch) {
+      return;
+    }
     _handleClearInput();
     _updateSearchState((state) => state?.copyWith(query: null));
   }
@@ -142,7 +152,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
   void dispose() {
     _appBarState.dispose();
     _textController.dispose();
-    _floatingActionButton.dispose();
+    _isFabExtendedNotifier.dispose();
+    _loadingNotifier.dispose();
     super.dispose();
   }
 
@@ -170,7 +181,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     }
     if (_isSearch) {
       return IconButton(
-        onPressed: _handleExitSearching,
+        onPressed: handleExitSearching,
         icon: Icon(Icons.arrow_back),
       );
     }
@@ -215,7 +226,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
       ]);
     }
     return genActions([
-      if (hasSearch)
+      if (hasSearch && widget.searchState?.autoAddSearch == true)
         IconButton(
           onPressed: () {
             _updateSearchState((state) => state?.copyWith(query: ''));
@@ -233,7 +244,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
         child: CommonPopScope(
           onPop: (context) {
             if (_isEdit || _isSearch) {
-              _handleExitSearching();
+              handleExitSearching();
               _appBarState.value.editState?.onExit();
               return false;
             }
@@ -244,18 +255,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
       );
     }
     return appBar;
-  }
-
-  Widget _buildLoading() {
-    return Consumer(
-      builder: (_, ref, _) {
-        final loading = ref.watch(loadingProvider);
-        final isMobileView = ref.watch(isMobileViewProvider);
-        return loading && isMobileView
-            ? const LinearProgressIndicator()
-            : Container();
-      },
-    );
   }
 
   PreferredSizeWidget _buildAppBar(VoidCallback? backAction) {
@@ -273,6 +272,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
                       automaticallyImplyLeading: backAction != null
                           ? false
                           : true,
+                      animateColor: true,
                       centerTitle: widget.centerTitle ?? false,
                       leading: _buildLeading(backAction),
                       title: _buildTitle(state.searchState),
@@ -286,7 +286,14 @@ class CommonScaffoldState extends State<CommonScaffold> {
                   );
                 },
               ),
-          _buildLoading(),
+          ValueListenableBuilder(
+            valueListenable: _loadingNotifier,
+            builder: (_, value, _) {
+              return value == true
+                  ? const LinearProgressIndicator()
+                  : Container();
+            },
+          ),
         ],
       ),
     );
@@ -339,17 +346,31 @@ class CommonScaffoldState extends State<CommonScaffold> {
     );
     return Scaffold(
       appBar: _buildAppBar(backActionProvider?.backAction),
-      body: body,
-      resizeToAvoidBottomInset: true,
+      body: NotificationListener<UserScrollNotification>(
+        child: body,
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.reverse) {
+            _isFabExtendedNotifier.value = false;
+          } else if (notification.direction == ScrollDirection.forward) {
+            _isFabExtendedNotifier.value = true;
+          }
+          return true;
+        },
+      ),
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       backgroundColor: widget.backgroundColor,
-      floatingActionButton:
-          widget.floatingActionButton ??
-          ValueListenableBuilder<Widget?>(
-            valueListenable: _floatingActionButton,
-            builder: (_, value, _) {
-              return value ?? SizedBox();
-            },
-          ),
+      floatingActionButton: widget.floatingActionButton != null
+          ? ValueListenableBuilder<bool>(
+              valueListenable: _isFabExtendedNotifier,
+              builder: (_, isExtended, child) {
+                return CommonScaffoldFabExtendedProvider(
+                  isExtended: isExtended,
+                  child: child!,
+                );
+              },
+              child: widget.floatingActionButton,
+            )
+          : null,
     );
   }
 }
@@ -361,22 +382,20 @@ List<Widget> genActions(List<Widget> actions, {double? space}) {
   ];
 }
 
-class CommonScaffoldBackActionProvider extends InheritedWidget {
-  final VoidCallback? backAction;
+class BaseScaffold extends StatelessWidget {
+  final String title;
+  final List<Widget> actions;
+  final Widget body;
 
-  const CommonScaffoldBackActionProvider({
+  const BaseScaffold({
     super.key,
-    required this.backAction,
-    required super.child,
+    required this.title,
+    this.actions = const [],
+    required this.body,
   });
 
-  static CommonScaffoldBackActionProvider? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<CommonScaffoldBackActionProvider>();
-  }
-
   @override
-  bool updateShouldNotify(CommonScaffoldBackActionProvider oldWidget) {
-    return false;
+  Widget build(BuildContext context) {
+    return CommonScaffold(body: body, title: title, actions: actions);
   }
 }

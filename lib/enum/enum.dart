@@ -133,7 +133,7 @@ enum InvokeMessageType { protect, process }
 
 enum FindProcessMode { always, off }
 
-enum RecoveryOption { all, onlyProfiles }
+enum RestoreOption { all, onlyProfiles }
 
 enum ChipType { action, delete }
 
@@ -197,7 +197,7 @@ extension KeyboardModifierExt on KeyboardModifier {
 
 enum HotAction { start, view, mode, proxy, tun }
 
-enum ProxiesIconStyle { standard, none, icon }
+enum ProxiesIconStyle { none, standard, icon }
 
 enum FontFamily {
   twEmoji('Twemoji'),
@@ -260,8 +260,8 @@ enum AuthorizeCode { none, success, error }
 enum WindowsHelperServiceStatus { none, presence, running }
 
 enum FunctionTag {
-  updateClashConfig,
-  setupClashConfig,
+  updateConfig,
+  setupConfig,
   updateStatus,
   updateGroups,
   addCheckIpNum,
@@ -280,6 +280,8 @@ enum FunctionTag {
   logs,
   requests,
   autoScrollToEnd,
+  loadedProvider,
+  saveSharedFile,
 }
 
 enum DashboardWidget {
@@ -368,6 +370,18 @@ enum RuleAction {
   final String value;
 
   const RuleAction(this.value);
+
+  static List<RuleAction> get addedRuleActions {
+    return RuleAction.values
+        .where(
+          (item) => ![
+            RuleAction.MATCH,
+            RuleAction.RULE_SET,
+            RuleAction.SUB_RULE,
+          ].contains(item),
+        )
+        .toList();
+  }
 }
 
 extension RuleActionExt on RuleAction {
@@ -384,18 +398,29 @@ extension RuleActionExt on RuleAction {
 
 enum OverrideRuleType { override, added }
 
-enum RuleTarget { DIRECT, REJECT }
+enum OverwriteType {
+  // none,
+  standard,
+  script,
+  // custom,
+}
 
-enum RecoveryStrategy { compatible, override }
+enum RuleTarget { DIRECT, REJECT, MATCH }
+
+enum RestoreStrategy { compatible, override }
 
 enum CacheTag { logs, rules, requests, proxiesList }
 
-enum Language { yaml, javaScript }
+enum Language { yaml, javaScript, json }
 
 enum ImportOption { file, url }
 
 enum ScrollPositionCacheKey { tools, profiles, proxiesList, proxiesTabList }
 
-enum QueryTag { proxies }
+enum QueryTag { proxies, access }
+
+enum LoadingTag { profiles, backup_restore, access, proxies }
 
 enum CoreStatus { connecting, connected, disconnected }
+
+enum RuleScene { added, disabled, custom }

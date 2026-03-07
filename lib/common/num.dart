@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/state.dart';
@@ -20,6 +22,10 @@ extension NumExt on num {
     return this * (1 + (globalState.theme.textScaleFactor - 1) * 0.5);
   }
 
+  double get mAp {
+    return this * min((1 + (globalState.theme.textScaleFactor - 1) * 0.5), 1);
+  }
+
   TrafficShow get traffic {
     final units = TrafficUnit.values;
     var size = toDouble();
@@ -31,6 +37,20 @@ extension NumExt on num {
     return TrafficShow(
       value: size.fixed(decimals: 1),
       unit: units[unitIndex].name,
+    );
+  }
+
+  TrafficShow get shortTraffic {
+    final units = TrafficUnit.values;
+    var size = toDouble();
+    var unitIndex = 0;
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    return TrafficShow(
+      value: size.toStringAsFixed(0),
+      unit: ' ${units[unitIndex].name}',
     );
   }
 }

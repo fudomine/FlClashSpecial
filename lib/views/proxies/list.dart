@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,7 +88,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     } else {
       tempUnfoldSet.add(groupName);
     }
-    globalState.appController.updateCurrentUnfoldSet(tempUnfoldSet);
+    appController.updateCurrentUnfoldSet(tempUnfoldSet);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _adjustHeader();
     });
@@ -197,7 +197,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
     if (_controller.position.maxScrollExtent == 0) {
       return 0;
     }
-    final currentGroups = globalState.appController.getCurrentGroups();
+    final currentGroups = appController.getCurrentGroups();
     final findIndex = currentGroups.indexWhere(
       (item) => item.name == groupName,
     );
@@ -257,7 +257,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
 
   void _scrollToGroupSelected(String groupName) {
     final currentInitOffset = _getGroupOffset(groupName);
-    final currentGroups = globalState.appController.getCurrentGroups();
+    final currentGroups = appController.getCurrentGroups();
     final proxies = currentGroups.getGroup(groupName)?.all;
     _jumpTo(
       currentInitOffset +
@@ -290,6 +290,7 @@ class _ProxiesListViewState extends State<ProxiesListView> {
         ref.watch(themeSettingProvider.select((state) => state.textScale));
         if (state.groups.isEmpty) {
           return NullStatus(
+            illustration: ProxyEmptyIllustration(),
             label: appLocalizations.nullTip(appLocalizations.proxies),
           );
         }
@@ -424,22 +425,6 @@ class _ListHeaderState extends State<ListHeader> {
         final iconStyle = ref.watch(
           proxiesStyleSettingProvider.select((state) => state.iconStyle),
         );
-        final icon = ref.watch(
-          proxiesStyleSettingProvider.select((state) {
-            final iconMapEntryList = state.iconMap.entries.toList();
-            final index = iconMapEntryList.indexWhere((item) {
-              try {
-                return RegExp(item.key).hasMatch(groupName);
-              } catch (_) {
-                return false;
-              }
-            });
-            if (index != -1) {
-              return iconMapEntryList[index].value;
-            }
-            return this.icon;
-          }),
-        );
         return switch (iconStyle) {
           ProxiesIconStyle.standard => LayoutBuilder(
             builder: (_, constraints) {
@@ -504,7 +489,10 @@ class _ListHeaderState extends State<ListHeader> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(groupName, style: context.textTheme.titleMedium),
+                        EmojiText(
+                          groupName,
+                          style: context.textTheme.titleMedium,
+                        ),
                         const SizedBox(height: 4),
                         Flexible(
                           flex: 1,
@@ -527,7 +515,7 @@ class _ListHeaderState extends State<ListHeader> {
                                             groupName,
                                           ),
                                         )
-                                        .getSafeValue('');
+                                        .takeFirstValid([]);
                                     return Row(
                                       mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment:
@@ -572,6 +560,9 @@ class _ListHeaderState extends State<ListHeader> {
                     onPressed: () {
                       widget.onScrollToSelected(groupName);
                     },
+                    style: ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     iconSize: 19,
                     icon: const Icon(Icons.adjust),
                   ),
@@ -581,6 +572,9 @@ class _ListHeaderState extends State<ListHeader> {
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.all(2),
                     onPressed: _delayTest,
+                    style: ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     icon: const Icon(Icons.network_ping),
                   ),
                   const SizedBox(width: 6),
@@ -590,6 +584,9 @@ class _ListHeaderState extends State<ListHeader> {
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.all(2),
                   iconSize: 24,
+                  style: ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   onPressed: () {
                     _handleChange(groupName);
                   },
