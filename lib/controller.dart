@@ -200,7 +200,7 @@ extension InitControllerExt on AppController {
     }
   }*/
   return;//return directly
-
+  }
 }
 
 extension StateControllerExt on AppController {
