@@ -56,7 +56,6 @@ extension InitControllerExt on AppController {
       window?.hide();
     }
     await _handleFailedPreference();
-    await _handlerDisclaimer();
     await _showCrashlyticsTip();
     await _connectCore();
     await _initCore();
@@ -119,22 +118,6 @@ extension InitControllerExt on AppController {
     _ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(crashlyticsTip: true));
-  }
-
-  Future<void> _handlerDisclaimer() async {
-    if (_ref.read(
-      appSettingProvider.select((state) => state.disclaimerAccepted),
-    )) {
-      return;
-    }
-    final isDisclaimerAccepted = await showDisclaimer();
-    if (!isDisclaimerAccepted) {
-      await handleExit();
-    }
-    _ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(disclaimerAccepted: true));
-    return;
   }
 
   Future<void> _initStatus() async {

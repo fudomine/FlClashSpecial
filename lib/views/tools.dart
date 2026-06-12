@@ -270,24 +270,6 @@ class _SettingItem extends StatelessWidget {
   }
 }
 /*
-class _DisclaimerItem extends StatelessWidget {
-  const _DisclaimerItem();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListItem(
-      leading: const Icon(Icons.gavel),
-      title: Text(context.appLocalizations.disclaimer),
-      onTap: () async {
-        final isDisclaimerAccepted = await appController.showDisclaimer();
-        if (!isDisclaimerAccepted) {
-          appController.handleExit();
-        }
-      },
-    );
-  }
-}
-*/
 class _InfoItem extends StatelessWidget {
   const _InfoItem();
 
