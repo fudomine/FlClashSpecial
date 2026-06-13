@@ -1,4 +1,20 @@
-## v1.8.92
+## v1.8.93
+
+- Support custom overwrite
+
+- Support run on demand
+
+- Optimize windows ipc
+
+- Optimize windows arm64
+
+- Optimize build
+
+- Optimize some details
+
+- Update core
+
+## v0.8.92
 
 - Add sqlite store
 

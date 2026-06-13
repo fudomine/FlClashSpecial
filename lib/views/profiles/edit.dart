@@ -3,11 +3,11 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/controller.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -71,9 +71,13 @@ class _EditProfileViewState extends State<EditProfileView> {
         minutes: int.parse(_autoUpdateDurationController.text),
       ),
     );
+    final profilesAction = globalState.container.read(
+      profilesActionProvider.notifier,
+    );
     final hasUpdate = widget.profile.url != profile.url;
     if (_fileData != null) {
       if (profile.type == ProfileType.url && _autoUpdate) {
+        final appLocalizations = context.appLocalizations;
         final res = await globalState.showMessage(
           title: appLocalizations.tip,
           message: TextSpan(text: appLocalizations.profileHasUpdate),
@@ -82,14 +86,14 @@ class _EditProfileViewState extends State<EditProfileView> {
           profile = profile.copyWith(autoUpdate: false);
         }
       }
-      appController.putProfile(await profile.saveFile(_fileData!));
+      profilesAction.putProfile(await profile.saveFile(_fileData!));
     } else if (!hasUpdate) {
-      appController.putProfile(profile);
+      profilesAction.putProfile(profile);
     } else {
-      appController.safeRun(() async {
+      globalState.safeRun(() async {
         await Future.delayed(commonDuration);
         if (hasUpdate) {
-          await appController.updateProfile(profile);
+          await profilesAction.updateProfile(profile);
         }
       });
     }
@@ -106,13 +110,13 @@ class _EditProfileViewState extends State<EditProfileView> {
   }
 
   Future<void> _handleSaveEdit(BuildContext context, String data) async {
-    final message = await appController.safeRun<String>(() async {
+    final message = await globalState.safeRun<String>(() async {
       final message = await coreController.validateConfigWithData(data);
       return message;
     }, silence: false);
     if (message?.isNotEmpty == true) {
       globalState.showMessage(
-        title: appLocalizations.tip,
+        title: currentAppLocalizations.tip,
         message: TextSpan(text: message),
       );
       return;
@@ -148,7 +152,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         }
         final res = await globalState.showMessage(
           title: title,
-          message: TextSpan(text: appLocalizations.hasCacheChange),
+          message: TextSpan(text: context.appLocalizations.hasCacheChange),
         );
         if (res == true && context.mounted) {
           _handleSaveEdit(context, content);
@@ -171,7 +175,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   }
 
   Future<void> _uploadProfileFile() async {
-    final platformFile = await appController.safeRun(picker.pickerFile);
+    final platformFile = await globalState.safeRun(picker.pickerFile);
     if (platformFile?.bytes == null) return;
     _fileData = platformFile?.bytes;
     if (!mounted) {
@@ -184,6 +188,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   }
 
   Future<void> _handleBack() async {
+    final appLocalizations = context.appLocalizations;
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.fileIsUpdate),
@@ -204,11 +209,12 @@ class _EditProfileViewState extends State<EditProfileView> {
     _fileInfoNotifier.dispose();
     _autoUpdateDurationController.dispose();
     super.dispose();
-    appController.autoApplyProfile();
+    globalState.container.read(setupActionProvider.notifier).autoApplyProfile();
   }
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     final items = [
       ListItem(
         title: TextFormField(
@@ -294,7 +300,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
-                        Text(fileInfo.desc),
+                        Text(fileInfo.getDesc(context)),
                         const SizedBox(height: 8),
                         Wrap(
                           runSpacing: 6,
