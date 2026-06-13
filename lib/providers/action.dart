@@ -63,13 +63,14 @@ class CommonAction extends _$CommonAction {
     ref.read(totalTrafficProvider.notifier).value = await coreController
         .getTotalTraffic(onlyStatisticsProxy);
   }
-
+/*
   Future<void> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return;
     final res = await request.checkForUpdate();
     checkUpdateResultHandle(data: res);
   }
-
+*/
+/*
   Future<void> checkUpdateResultHandle({
     Map<String, dynamic>? data,
     bool isUser = false,
@@ -108,6 +109,7 @@ class CommonAction extends _$CommonAction {
       );
     }
   }
+*/
 }
 
 @Riverpod(keepAlive: true)
@@ -856,7 +858,7 @@ class ProfilesAction extends _$ProfilesAction {
       }
     }
   }
-
+/*
   Future<void> autoUpdateProfiles() async {
     for (final profile in ref.read(profilesProvider)) {
       if (!profile.autoUpdate) continue;
@@ -873,6 +875,7 @@ class ProfilesAction extends _$ProfilesAction {
       }
     }
   }
+  */
 
   void putProfile(Profile profile) {
     ref.read(profilesProvider.notifier).put(profile);

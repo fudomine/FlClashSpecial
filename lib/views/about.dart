@@ -24,7 +24,7 @@ class Contributor {
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
-
+/*
   Future<void> _checkUpdate(BuildContext context) async {
     final data = await globalState.safeRun<Map<String, dynamic>?>(
       request.checkForUpdate,
@@ -34,6 +34,7 @@ class AboutView extends StatelessWidget {
         .read(commonActionProvider.notifier)
         .checkUpdateResultHandle(data: data, isUser: true);
   }
+*/
 
   List<Widget> _buildMoreSection(BuildContext context) {
     final appLocalizations = context.appLocalizations;

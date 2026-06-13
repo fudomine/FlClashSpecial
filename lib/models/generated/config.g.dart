@@ -22,7 +22,7 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
       autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
       showLabel: json['showLabel'] as bool? ?? true,
-      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
+      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? true,
       crashlyticsTip: json['crashlyticsTip'] as bool? ?? false,
       crashlytics: json['crashlytics'] as bool? ?? false,
       minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,

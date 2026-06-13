@@ -24,7 +24,7 @@ class Application extends ConsumerStatefulWidget {
 }
 
 class ApplicationState extends ConsumerState<Application> {
-  Timer? _autoUpdateProfilesTaskTimer;
+ // Timer? _autoUpdateProfilesTaskTimer;
   bool _preHasVpn = false;
 
   final _pageTransitionsTheme = const PageTransitionsTheme(
@@ -52,7 +52,7 @@ class ApplicationState extends ConsumerState<Application> {
       } else {
         exit(0);
       }
-      _autoUpdateProfilesTask();
+    //  _autoUpdateProfilesTask();
       _initLink();
       app?.initShortcuts();
     });
@@ -81,13 +81,13 @@ class ApplicationState extends ConsumerState<Application> {
       ref.read(profilesActionProvider.notifier).addProfileFormURL(url);
     });
   }
-
+/*
   void _autoUpdateProfilesTask() {
     _autoUpdateProfilesTaskTimer = Timer(const Duration(minutes: 20), () async {
       await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
       _autoUpdateProfilesTask();
     });
-  }
+  }*/
 
   Widget _buildPlatformState({required Widget child}) {
     if (system.isDesktop) {
@@ -187,7 +187,7 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   Future<void> dispose() async {
     linkManager.destroy();
-    _autoUpdateProfilesTaskTimer?.cancel();
+    //_autoUpdateProfilesTaskTimer?.cancel();
     await coreController.destroy();
     await ref.read(systemActionProvider.notifier).handleExit();
     super.dispose();

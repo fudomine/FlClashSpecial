@@ -76,7 +76,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool isAnimateToPage,
     @Default(false) bool autoCheckUpdate,
     @Default(true) bool showLabel,
-    @Default(false) bool disclaimerAccepted,
+    @Default(true) bool disclaimerAccepted,
     @Default(false) bool crashlyticsTip,
     @Default(false) bool crashlytics,
     @Default(true) bool minimizeOnExit,

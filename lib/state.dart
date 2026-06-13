@@ -308,8 +308,8 @@ class GlobalState {
       );
     };
     container.read(systemActionProvider.notifier).updateTray();
-    container.read(profilesActionProvider.notifier).autoUpdateProfiles();
-    container.read(commonActionProvider.notifier).autoCheckUpdate();
+  //  container.read(profilesActionProvider.notifier).autoUpdateProfiles();
+    //container.read(commonActionProvider.notifier).autoCheckUpdate();
     autoLaunch?.updateStatus(container.read(appSettingProvider).autoLaunch);
     if (!container.read(appSettingProvider).silentLaunch) {
       window?.show();
@@ -317,7 +317,7 @@ class GlobalState {
       window?.hide();
     }
     await _handleFailedPreference();
-    await _handlerDisclaimer();
+    //await _handlerDisclaimer();
     await _showCrashlyticsTip();
     await container.read(coreActionProvider.notifier).connectCore();
     await container.read(coreActionProvider.notifier).initCore();
@@ -338,7 +338,7 @@ class GlobalState {
     }
     await container.read(systemActionProvider.notifier).handleExit();
   }
-
+/*
   Future<bool> showDisclaimer() async {
     return await showCommonDialog<bool>(
           dismissible: false,
@@ -363,6 +363,7 @@ class GlobalState {
         ) ??
         false;
   }
+*/
 
   Future<void> _showCrashlyticsTip() async {
     if (!system.isAndroid) return;
@@ -380,7 +381,7 @@ class GlobalState {
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(crashlyticsTip: true));
   }
-
+/*
   Future<void> _handlerDisclaimer() async {
     if (container.read(
       appSettingProvider.select((state) => state.disclaimerAccepted),
@@ -395,6 +396,7 @@ class GlobalState {
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(disclaimerAccepted: true));
   }
+*/
 }
 
 final globalState = GlobalState();
