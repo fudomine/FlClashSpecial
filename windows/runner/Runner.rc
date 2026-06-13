@@ -92,10 +92,10 @@ BEGIN
             VALUE "CompanyName", "com.flclash" "\0"
             VALUE "FileDescription", "FlClash" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "clash" "\0"
+            VALUE "InternalName", "speclash" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 flclash. All rights reserved." "\0"
             VALUE "OriginalFilename", "FlClash.exe" "\0"
-            VALUE "ProductName", "clash" "\0"
+            VALUE "ProductName", "speclash" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
