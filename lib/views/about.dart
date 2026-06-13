@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/controller.dart';
-import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
@@ -24,16 +24,20 @@ class Contributor {
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
-
+/*
   Future<void> _checkUpdate(BuildContext context) async {
-    final data = await appController.safeRun<Map<String, dynamic>?>(
+    final data = await globalState.safeRun<Map<String, dynamic>?>(
       request.checkForUpdate,
-      title: appLocalizations.checkUpdate,
+      title: context.appLocalizations.checkUpdate,
     );
-    appController.checkUpdateResultHandle(data: data, isUser: true);
+    globalState.container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(data: data, isUser: true);
   }
+*/
 
   List<Widget> _buildMoreSection(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     return generateSection(
       separated: false,
       title: appLocalizations.more,
@@ -86,6 +90,7 @@ class AboutView extends StatelessWidget {
 */
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     final items = [
       ListTile(
         title: Column(
@@ -175,9 +180,9 @@ class Avatar extends StatelessWidget {
           Text(contributor.name, style: context.textTheme.bodySmall),
         ],
       ),
-      onTap: () {
-        globalState.openUrl(contributor.link);
-      },
+      // onTap: () {
+      //   globalState.openUrl(contributor.link);
+      // },
     );
   }
 }
@@ -206,7 +211,7 @@ class _DeveloperModeDetectorState extends State<_DeveloperModeDetector> {
       _resetCounter();
     } else {
       _timer?.cancel();
-      _timer = Timer(Duration(seconds: 1), _resetCounter);
+      _timer = Timer(const Duration(seconds: 1), _resetCounter);
     }
   }
 

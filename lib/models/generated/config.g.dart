@@ -22,7 +22,7 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
       autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
       showLabel: json['showLabel'] as bool? ?? true,
-      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
+      disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? true,
       crashlyticsTip: json['crashlyticsTip'] as bool? ?? false,
       crashlytics: json['crashlytics'] as bool? ?? false,
       minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
@@ -339,7 +339,14 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       : WindowProps.fromJson(json['windowProps'] as Map<String, dynamic>?),
   patchClashConfig: json['patchClashConfig'] == null
       ? defaultClashConfig
-      : ClashConfig.fromJson(json['patchClashConfig'] as Map<String, dynamic>),
+      : PatchClashConfig.fromJson(
+          json['patchClashConfig'] as Map<String, dynamic>,
+        ),
+  excludeSSIDs:
+      (json['excludeSSIDs'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
@@ -354,4 +361,5 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'proxiesStyleProps': instance.proxiesStyleProps,
   'windowProps': instance.windowProps,
   'patchClashConfig': instance.patchClashConfig,
+  'excludeSSIDs': instance.excludeSSIDs,
 };
