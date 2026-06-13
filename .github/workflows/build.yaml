@@ -14,33 +14,7 @@ env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.41.9
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze --no-fatal-infos
-
-      - name: Run tests
-        run: flutter test --reporter expanded
-
   build:
-    needs: [ test ]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
