@@ -1,3 +1,11 @@
+## v1.8.93a
+
+- Update build.yaml
+
+- fix bug
+
+- add android
+
 ## v1.8.93
 
 - change windows default dir
