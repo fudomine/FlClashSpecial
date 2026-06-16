@@ -25,7 +25,7 @@ val isRelease =
 
 
 android {
-    namespace = "com.special.meta"
+    namespace = "com.follow.clash"
     compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndkVersion.get()
 
