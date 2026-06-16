@@ -1,3 +1,29 @@
+## v1.8.93
+
+- change windows default dir
+
+- optimized build
+
+- update 0.8.93
+
+- Update pubspec.lock
+
+- delete showDisclaimer
+
+- Support custom overwrite
+
+- Support run on demand
+
+- Optimize windows ipc
+
+- Optimize windows arm64
+
+- Optimize build
+
+- Optimize some details
+
+- Update core
+
 ## v1.8.92
 
 - regenerated freezed.dart
